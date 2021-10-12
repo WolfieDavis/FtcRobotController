@@ -62,12 +62,12 @@
                 }
                 else{
                     spinner.setBrake(false);
-                    spinner.setPower(0.0);
+                    spinner.setPower(0.4);
                 }
             }
             else if(gamepad1.a){
                 spinner.setBrake(false);
-                spinner.setPower(0.8);
+                spinner.setPower(0.4);
             }
             else{
                 spinner.setBrake(true);
