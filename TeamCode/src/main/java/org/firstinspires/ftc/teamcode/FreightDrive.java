@@ -2,6 +2,7 @@
 
     import com.qualcomm.robotcore.eventloop.opmode.OpMode;
     import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+    import com.qualcomm.robotcore.hardware.TouchSensor;
 
     import org.firstinspires.ftc.teamcode.api.DcMotorX;
     import org.firstinspires.ftc.teamcode.api.Drivetrain;
@@ -11,9 +12,13 @@
     public class FreightDrive extends OpMode {
 
         private Drivetrain drivetrain;
+        // Spinner Motor
         private DcMotorX
             spinner;
         private double power = 1;
+        //Spinner Limit Switch
+        private TouchSensor limitForward = null;
+
 
         //yes?? // Using a custom state instead of saving entire gamepad1 (doing otherwise causes lag)
         private State.Buttons lastButtons1 = new State.Buttons();
@@ -39,15 +44,6 @@
             double rightY = -gamepad1.right_stick_y; // Reads negative from the controller
             boolean a = gamepad1.a;
 
-            //spinner code
-            if(gamepad1.a){
-                spinner.setPower(0.8);
-            }
-            else{
-                spinner.setPower(0);
-            }
-
-
             // Drive the robot with joysticks if they are moved (with rates)
             if(Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
                 drivetrain.driveWithGamepad(1, rateCurve(rightY, 1.7),rateCurve(leftX, 1.7)/* 0.5*leftX */, rateCurve(rightX,1.7));      //curved stick rates
@@ -55,6 +51,22 @@
                 // If the joysticks are not pressed, do not move the bot
                 drivetrain.stop();
             }
+
+
+            //Spinner Drive Code (Assumes limitForward is NC)
+            //Maybe add Speed Ramps?
+            if(gamepad1.a){
+                if(limitForward.isPressed()){
+                    spinner.setPower(0.8);
+                }
+                else{
+                  spinner.setPower(0.0);
+                }
+            }
+            else{
+                spinner.setPower(0);
+            }
+
         }
 
         private double rateCurve(double input, double rate){
