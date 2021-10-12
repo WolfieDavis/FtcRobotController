@@ -17,7 +17,7 @@
             spinner;
         private double power = 1;
         //Spinner Limit Switch
-        private TouchSensor limitForward = null;
+        private TouchSensor limitForward;
 
 
         //yes?? // Using a custom state instead of saving entire gamepad1 (doing otherwise causes lag)
