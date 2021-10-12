@@ -55,16 +55,23 @@
 
             //Spinner Drive Code (Assumes limitForward is NC)
             //Maybe add Speed Ramps?
-            if(gamepad1.a){
-                if(limitForward.isPressed()){
-                    spinner.setPower(0.8);
+            if(limitForward.isPressed()){
+                if(gamepad1.a){
+                    spinner.setPower(0.0);
+                    spinner.setBrake(true);
                 }
                 else{
-                  spinner.setPower(0.0);
+                    spinner.setBrake(false);
+                    spinner.setPower(0.0);
                 }
             }
+            else if(gamepad1.a){
+                spinner.setBrake(false);
+                spinner.setPower(0.8);
+            }
             else{
-                spinner.setPower(0);
+                spinner.setBrake(true);
+                spinner.setPower(0.0);
             }
 
         }
