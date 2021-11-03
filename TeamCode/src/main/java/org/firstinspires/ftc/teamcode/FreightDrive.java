@@ -62,7 +62,7 @@
             else{
                 spinner.setPower(0);
             }
-            
+
 
             // Drive the robot with joysticks if they are moved (with rates)
             if(Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
