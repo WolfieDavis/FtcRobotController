@@ -21,6 +21,7 @@
         private Drivetrain drivetrain;
         private DcMotorX
             spinner;
+        private DcMotorX linear;
         private double power = 1;
         private TouchSensor spinLimit;
         //limit switch is named spinLimit
@@ -36,6 +37,8 @@
                     mLF = new DcMotorX(hardwareMap.dcMotor.get("mLF")),
                     mRB = new DcMotorX(hardwareMap.dcMotor.get("mRB")),
                     mLB = new DcMotorX(hardwareMap.dcMotor.get("mLB"));
+
+            DcMotorX linear = new DcMotorX(hardwareMap.dcMotor.get("linear"));//motor for linear rail
 
             drivetrain = new Drivetrain(mRF, mLF, mRB, mLB);
 
@@ -55,11 +58,19 @@
                 spinDirection *= -1;
             }
 
+            //code for the linear rail uses the values read by the trigger. curve it later.
+            if (gamepad1.right_trigger >  0.01){
+                linear.setPower(gamepad1.right_trigger);
+            } else if (gamepad1.left_trigger > 0.01){
+                linear.setPower(-gamepad1.left_trigger);
+            } else {
+                linear.setPower(0.00);
+            }
+
             //spinner code
             if(gamepad1.a || gamepad2.a){
-                    spinner.setPower(0.8 * spinDirection);
-            }
-            else{
+                spinner.setPower(0.8 * spinDirection);
+            } else {
                 spinner.setPower(0);
             }
 
