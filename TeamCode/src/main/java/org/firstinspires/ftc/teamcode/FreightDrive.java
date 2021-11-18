@@ -73,24 +73,20 @@
             boolean b1 = gamepad1.b;
             boolean x1 = gamepad1.x;
             boolean y1 = gamepad1.y;
-            /* unused so commented to possibly reduce lag
             boolean dpadUp1 = gamepad1.dpad_up;
             boolean dpadDown1 = gamepad1.dpad_down;
             boolean dpadRight1 = gamepad1.dpad_right;
             boolean dpadLeft1 = gamepad1.dpad_left;
-             */
             boolean bumperLeft1 = gamepad1.left_bumper;
             boolean bumperRight1 = gamepad1.right_bumper;
             boolean xHit1 = x1 && !lastButtons1.x;
             boolean yHit1 = y1 && !lastButtons1.y;
             boolean aHit1 = a1 && !lastButtons1.a;
             boolean bHit1 = b1 && !lastButtons1.b;
-            /*
             boolean dpadUpHit1 = dpadUp1 && !lastDpads1.dpad_up;
             boolean dpadDownHit1 = dpadDown1 && !lastDpads1.dpad_down;
             boolean dpadRightHit1 = dpadRight1 && !lastDpads1.dpad_right;
             boolean dpadLeftHit1 = dpadLeft1 && !lastDpads1.dpad_left;
-             */
             boolean bumperLeftHit1 = bumperLeft1 && !lastBumpers1.left_bumper;
             boolean bumperRightHit1 = bumperRight1 && !lastBumpers1.right_bumper;
 
@@ -100,24 +96,20 @@
             boolean b2 = gamepad2.b;
             boolean x2 = gamepad2.x;
             boolean y2 = gamepad2.y;
-            /* unused so commented to possibly reduce lag
             boolean dpadUp2 = gamepad1.dpad_up;
             boolean dpadDown2 = gamepad1.dpad_down;
             boolean dpadRight2 = gamepad1.dpad_right;
             boolean dpadLeft2 = gamepad1.dpad_left;
-             */
             boolean bumperLeft2 = gamepad2.left_bumper;
             boolean bumperRight2 = gamepad2.right_bumper;
             boolean xHit2 = x2 && !lastButtons2.x;
             boolean yHit2 = y2 && !lastButtons2.y;
             boolean aHit2 = a2 && !lastButtons2.a;
             boolean bHit2 = b2 && !lastButtons2.b;
-            /*
             boolean dpadUpHit2 = dpadUp2 && !lastDpads1.dpad_up;
             boolean dpadDownHit2 = dpadDown2 && !lastDpads1.dpad_down;
             boolean dpadRightHit2 = dpadRight2 && !lastDpads1.dpad_right;
             boolean dpadLeftHit2 = dpadLeft2 && !lastDpads1.dpad_left;
-             */
             boolean bumperLeftHit2 = bumperLeft2 && !lastBumpers2.left_bumper;
             boolean bumperRightHit2 = bumperRight2 && !lastBumpers2.right_bumper;
 
@@ -146,8 +138,10 @@
             //code for the linear rail uses the values read by the trigger.
             if ((gamepad1.right_trigger >  0.01)||(gamepad2.left_trigger > 0.01)){ //raises the linear slide
                 linear.setPower(gamepad1.right_trigger);
+                output.setDistance(5);//raises output to hold freight
             } else if ((gamepad1.left_trigger > 0.01)||(gamepad2.right_trigger > 0.01)){ //lowers linear slide
                 linear.setPower(-gamepad1.left_trigger);
+                output.setDistance(-5);//drops output down to collect freight
             } else {
                 linear.setPower(0.0);
             }
@@ -183,11 +177,11 @@
 
             // Save button states
             lastButtons1.update(a1, b1, x1, y1);
-            //lastDpads2.update(dpadUp1, dpadDown1, dpadRight1, dpadLeft1);
+            lastDpads2.update(dpadUp1, dpadDown1, dpadRight1, dpadLeft1);
             lastBumpers1.update(bumperRight1, bumperLeft1);
 
             lastButtons2.update(a2, b2, x2, y2);
-            //lastDpads2.update(dpadUp2, dpadDown2, dpadRight2, dpadLeft2);
+            lastDpads2.update(dpadUp2, dpadDown2, dpadRight2, dpadLeft2);
             lastBumpers2.update(bumperRight2, bumperLeft2);
 
         }//end of loop
