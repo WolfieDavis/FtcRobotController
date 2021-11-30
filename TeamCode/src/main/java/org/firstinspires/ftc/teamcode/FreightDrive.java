@@ -139,14 +139,14 @@
             }
              */
 
-            if(xHit1 || xHit2) output.setAngle(output.getAngle() > 5 ? 5 : 150);
+            if(xHit1 || xHit2) output.setAngle(output.getAngle() < 5 ? 5 : 150);
 
             //code for the linear rail uses the values read by the trigger.
-            if ((gamepad1.right_trigger >  0.01)||(gamepad2.left_trigger > 0.01)){ //raises the linear slide
-                linear.setPower(gamepad1.right_trigger);
+            if (gamepad2.left_trigger > 0.01){ //raises the linear slide
+                linear.setPower(gamepad2.right_trigger);
                 //output.setDistance(5);//raises output to hold freight
-            } else if ((gamepad1.left_trigger > 0.01)||(gamepad2.right_trigger > 0.01)){ //lowers linear slide
-                linear.setPower(-gamepad1.left_trigger);
+            } else if (gamepad2.right_trigger > 0.01){ //lowers linear slide
+                linear.setPower(-gamepad2.left_trigger);
                 //output.setDistance(-5);//drops output down to collect freight
             } else {
                 linear.setPower(0.0);
