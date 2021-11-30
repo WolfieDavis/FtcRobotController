@@ -139,7 +139,9 @@
             }
              */
 
-            if(xHit1 || xHit2) output.setAngle(output.getAngle() < 5 ? 5 : 150);
+           // if(xHit1 || xHit2) output.setAngle(output.getAngle() > 5 ? 5 : 150);
+
+            output.setAngle((x1||x2) ? 150 : 5);
 
             //code for the linear rail uses the values read by the trigger.
             if (gamepad2.left_trigger > 0.01){ //raises the linear slide
