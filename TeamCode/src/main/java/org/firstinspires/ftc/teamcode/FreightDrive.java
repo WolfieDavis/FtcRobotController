@@ -43,7 +43,7 @@
         //misc toggle / value change variables
         int spinDirection = 1;
         int intakeToggle = 1;
-        int outputToggle = 1;
+        // int outputToggle = 1;
 
         public void init(){
             DcMotorX mRF= new DcMotorX(hardwareMap.dcMotor.get("mRF")),
@@ -57,7 +57,7 @@
             intake = new DcMotorX(hardwareMap.dcMotor.get("intake"));//motor for intake spinner
             spinner = new DcMotorX(hardwareMap.dcMotor.get("spinner"));//motor for carousel spinner
 
-            output = new ServoX(hardwareMap.servo.get("output"),180,0,150);//servo for output dropper, constrained to 150 degrees of rotation
+            output = new ServoX(hardwareMap.servo.get("output"),180,180,25);//servo for output dropper, constrained to 150 degrees of rotation (test actual range of servo)
 
         }// end of init
 
@@ -123,6 +123,9 @@
 
             spinDirection = (bumperLeftHit1 || bumperLeftHit2)? spinDirection *= -1: spinDirection; //reverse the direction if left bumper  is pressed
 
+
+            /*
+            //code for the output dropper
             if (xHit1 || xHit2){
                 outputToggle *= -1;
                 switch (outputToggle){
@@ -134,14 +137,17 @@
                         break;
                 }//end of switch case
             }
+             */
+
+            if(xHit1 || xHit2) output.setAngle(output.getAngle() > 5 ? 5 : 150);
 
             //code for the linear rail uses the values read by the trigger.
             if ((gamepad1.right_trigger >  0.01)||(gamepad2.left_trigger > 0.01)){ //raises the linear slide
                 linear.setPower(gamepad1.right_trigger);
-                output.setDistance(5);//raises output to hold freight
+                //output.setDistance(5);//raises output to hold freight
             } else if ((gamepad1.left_trigger > 0.01)||(gamepad2.right_trigger > 0.01)){ //lowers linear slide
                 linear.setPower(-gamepad1.left_trigger);
-                output.setDistance(-5);//drops output down to collect freight
+                //output.setDistance(-5);//drops output down to collect freight
             } else {
                 linear.setPower(0.0);
             }
@@ -151,7 +157,7 @@
                 intakeToggle *= -1;
                 switch (intakeToggle){
                     case -1 :
-                        intake.setPower(0.5);
+                        intake.setPower(0.8);
                         break;
                     case 1 :
                         intake.setPower(0.0);
@@ -169,7 +175,7 @@
 
             // Drive the robot with joysticks if they are moved (with rates)
             if(Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
-                drivetrain.driveWithGamepad(1, rateCurve(rightY, 1.7),rateCurve(leftX, 1.7)/* 0.5*leftX */, rateCurve(rightX,1.7));      //curved stick rates
+                drivetrain.driveWithGamepad(1, rateCurve(rightY, 1.7),rateCurve(leftX, 1.7)/* 0.5*leftX */, rateCurve(rightX,1.7)); //curved stick rates
             }else{
                 // If the joysticks are not pressed, do not move the bot
                 drivetrain.stop();
