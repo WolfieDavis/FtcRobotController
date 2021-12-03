@@ -25,7 +25,7 @@
             linear,
             intake;
         private ServoX
-            output;
+            outtake;
 
         private double power = 1;
         private TouchSensor spinLimit;
@@ -43,7 +43,7 @@
         //misc toggle / value change variables
         int spinDirection = 1;
         int intakeToggle = 1;
-        // int outputToggle = 1;
+        int outtakeToggle = 1;
 
         public void init(){
             DcMotorX mRF= new DcMotorX(hardwareMap.dcMotor.get("mRF")),
@@ -57,7 +57,7 @@
             intake = new DcMotorX(hardwareMap.dcMotor.get("intake"));//motor for intake spinner
             spinner = new DcMotorX(hardwareMap.dcMotor.get("spinner"));//motor for carousel spinner
 
-            output = new ServoX(hardwareMap.servo.get("output"),180,180,25);//servo for output dropper, constrained to 150 degrees of rotation (test actual range of servo)
+            outtake = new ServoX(hardwareMap.servo.get("outtake"), 5, 180);//servo for outtake dropper, constrained to 150 degrees of rotation (test actual range of servo)
 
         }// end of init
 
@@ -118,38 +118,53 @@
             //misc toggle / value change variables
             int spinDirection = 1;
             int intakeToggle = 1;
-            int outputToggle = 1;
+            int outtakeToggle = 1;
             */
 
             spinDirection = (bumperLeftHit1 || bumperLeftHit2)? spinDirection *= -1: spinDirection; //reverse the direction if left bumper  is pressed
 
 
             /*
-            //code for the output dropper
+            //code for the outtake dropper
             if (xHit1 || xHit2){
-                outputToggle *= -1;
-                switch (outputToggle){
+                outtakeToggle *= -1;
+                switch (outtakeToggle){
                     case -1 :
-                        output.setAngle(150);
+                        outtake.setAngle(150);
                         break;
                     case 1 :
-                        output.setAngle(10);
+                        outtake.setAngle(10);
                         break;
                 }//end of switch case
             }
+
              */
 
-           // if(xHit1 || xHit2) output.setAngle(output.getAngle() > 5 ? 5 : 150);
+            //code for outtake dropper
+            if(xHit1||xHit2){
+                if (outtake.getAngle() == 10){
+                    outtake.setAngle(150);
+                } else if(outtake.getAngle()== 150){
+                    outtake.setAngle(10);
+                }
+            }
 
-            output.setAngle((x1||x2) ? 150 : 5);
+
+            // if(xHit1 || xHit2) outtake.setAngle(outtake.getAngle() > 5 ? 5 : 150);// issacs original code for similar function
+            // outtake.setAngle((x1||x2) ? 150 : 5); // weak-sauce version
+            /*
+            if (xHit1||xHit2){
+                outtake.setAngle((outtake.getAngle() <= 5)? 5: 150);
+            } //this might work? needs to be tested
+             */
 
             //code for the linear rail uses the values read by the trigger.
-            if (gamepad2.left_trigger > 0.01){ //raises the linear slide
+            if (gamepad2.right_trigger > 0.01){ //raises the linear slide
                 linear.setPower(gamepad2.right_trigger);
-                //output.setDistance(5);//raises output to hold freight
-            } else if (gamepad2.right_trigger > 0.01){ //lowers linear slide
+                //outtake.setDistance(5);//raises outtake to hold freight
+            } else if (gamepad2.left_trigger > 0.01){ //lowers linear slide
                 linear.setPower(-gamepad2.left_trigger);
-                //output.setDistance(-5);//drops output down to collect freight
+                //outtake.setDistance(-5);//drops outtake down to collect freight
             } else {
                 linear.setPower(0.0);
             }
