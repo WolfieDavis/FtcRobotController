@@ -15,6 +15,12 @@
     import org.firstinspires.ftc.teamcode.api.ServoX;
     import org.firstinspires.ftc.teamcode.api.State;
 
+    /*
+    * Robohawks ftc team 5741
+    * Drive code for driver controlled period
+    * contributers: Wolfie Davis, Crawford Phillips, Will Sprigg
+    */
+
     @TeleOp
     public class FreightDrive extends OpMode {
 
@@ -57,7 +63,7 @@
             intake = new DcMotorX(hardwareMap.dcMotor.get("intake"));//motor for intake spinner
             spinner = new DcMotorX(hardwareMap.dcMotor.get("spinner"));//motor for carousel spinner
 
-            outtake = new ServoX(hardwareMap.servo.get("outtake"), 5, 180);//servo for outtake dropper, constrained to 150 degrees of rotation (test actual range of servo)
+            outtake = new ServoX(hardwareMap.servo.get("outtake"));//servo for outtake dropper
 
         }// end of init
 
@@ -90,7 +96,6 @@
             boolean bumperLeftHit1 = bumperLeft1 && !lastBumpers1.left_bumper;
             boolean bumperRightHit1 = bumperRight1 && !lastBumpers1.right_bumper;
 
-
             //button definitions for gamepad2
             boolean a2 = gamepad2.a;
             boolean b2 = gamepad2.b;
@@ -114,16 +119,14 @@
             boolean bumperRightHit2 = bumperRight2 && !lastBumpers2.right_bumper;
 
 
-            /* idk if this works i defined them earlier come back to this
-            //misc toggle / value change variables
-            int spinDirection = 1;
-            int intakeToggle = 1;
-            int outtakeToggle = 1;
-            */
+            //outtake code
+            if (y1||y2){//flip the outake
+                outtake.setAngle(45);
+            } else if (x1||x2){//unflips the outake
+                outtake.setAngle(175);
+            }
 
-            spinDirection = (bumperLeftHit1 || bumperLeftHit2)? spinDirection *= -1: spinDirection; //reverse the direction if left bumper  is pressed
-
-
+            // all of the failed outtake code
             /*
             //code for the outtake dropper
             if (xHit1 || xHit2){
@@ -138,33 +141,34 @@
                 }//end of switch case
             }
 
-             */
+
 
             //code for outtake dropper
             if(xHit1||xHit2){
                 if (outtake.getAngle() == 10){
-                    outtake.setAngle(150);
+                    outtake.setDistance(140); //trying setdistance to see if it works better
                 } else if(outtake.getAngle()== 150){
-                    outtake.setAngle(10);
+                    outtake.setDistance(-140);
                 }
             }
+            
+            if(xHit1 || xHit2) outtake.setAngle(outtake.getAngle() > 5 ? 5 : 150);
 
+            outtake.setAngle((x1||x2) ? 150 : 5); // weak-sauce version
 
-            // if(xHit1 || xHit2) outtake.setAngle(outtake.getAngle() > 5 ? 5 : 150);// issacs original code for similar function
-            // outtake.setAngle((x1||x2) ? 150 : 5); // weak-sauce version
-            /*
             if (xHit1||xHit2){
                 outtake.setAngle((outtake.getAngle() <= 5)? 5: 150);
             } //this might work? needs to be tested
-             */
+            */
+
 
             //code for the linear rail uses the values read by the trigger.
             if (gamepad2.right_trigger > 0.01){ //raises the linear slide
-                linear.setPower(gamepad2.right_trigger);
-                //outtake.setDistance(5);//raises outtake to hold freight
+                linear.setPower(-gamepad2.right_trigger);
+                outtake.setAngle(165);//raises outtake to hold freight
             } else if (gamepad2.left_trigger > 0.01){ //lowers linear slide
-                linear.setPower(-gamepad2.left_trigger);
-                //outtake.setDistance(-5);//drops outtake down to collect freight
+                linear.setPower(gamepad2.left_trigger);
+                outtake.setAngle(180);//drops outtake down to collect freight
             } else {
                 linear.setPower(0.0);
             }
@@ -182,8 +186,9 @@
                 }//end of switch case
             }
 
+            spinDirection = (bumperLeftHit1 || bumperLeftHit2)? spinDirection *= -1: spinDirection; //reverse the direction if left bumper  is pressed
             //carousel spinner triggered w/ a press
-            if(gamepad1.a || gamepad2.a){
+            if(a1 || a2){
                 spinner.setPower(0.8 * spinDirection);
             } else {
                 spinner.setPower(0);
@@ -200,7 +205,7 @@
 
             // Save button states
             lastButtons1.update(a1, b1, x1, y1);
-            lastDpads2.update(dpadUp1, dpadDown1, dpadRight1, dpadLeft1);
+            lastDpads1.update(dpadUp1, dpadDown1, dpadRight1, dpadLeft1);
             lastBumpers1.update(bumperRight1, bumperLeft1);
 
             lastButtons2.update(a2, b2, x2, y2);
