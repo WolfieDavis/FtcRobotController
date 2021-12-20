@@ -46,10 +46,12 @@
         private State.Dpad lastDpads2 = new State.Dpad();
         private State.Bumpers lastBumpers2 = new State.Bumpers();
 
-        //misc toggle / value change variables
+        //misc toggle and value change variables
         int spinDirection = 1;
         int intakeToggle = 1;
-        int outtakeToggle = 1;
+        int intakeSpinDir = 1;
+        boolean isReversed = false;
+        //int outtakeToggle = 1;
 
         public void init(){
             DcMotorX mRF= new DcMotorX(hardwareMap.dcMotor.get("mRF")),
@@ -62,7 +64,6 @@
             linear = new DcMotorX(hardwareMap.dcMotor.get("linear"));//motor for linear rail
             intake = new DcMotorX(hardwareMap.dcMotor.get("intake"));//motor for intake spinner
             spinner = new DcMotorX(hardwareMap.dcMotor.get("spinner"));//motor for carousel spinner
-
             outtake = new ServoX(hardwareMap.servo.get("outtake"));//servo for outtake dropper
 
         }// end of init
@@ -118,13 +119,22 @@
             boolean bumperLeftHit2 = bumperLeft2 && !lastBumpers2.left_bumper;
             boolean bumperRightHit2 = bumperRight2 && !lastBumpers2.right_bumper;
 
+            //do we want this? does it work?
+            if(dpadUpHit1 || dpadUpHit2){
+                drivetrain.reverse();
+                isReversed = !isReversed;
+            }//reverses the bot
 
             //outtake code
             if (y1||y2){//flip the outake
                 outtake.setAngle(45);
-            } else if (x1||x2){//unflips the outake
+            }
+            //unused
+            /*
+            else if (x1||x2){//unflips the outake
                 outtake.setAngle(175);
             }
+            */
 
             // all of the failed outtake code
             /*
@@ -146,7 +156,7 @@
             //code for outtake dropper
             if(xHit1||xHit2){
                 if (outtake.getAngle() == 10){
-                    outtake.setDistance(140); //trying setdistance to see if it works better
+                    outtake.setDistance(140); //trying setdistance to see if it works                                                                                               etter
                 } else if(outtake.getAngle()== 150){
                     outtake.setDistance(-140);
                 }
@@ -165,7 +175,7 @@
             //code for the linear rail uses the values read by the trigger.
             if (gamepad2.right_trigger > 0.01){ //raises the linear slide
                 linear.setPower(-gamepad2.right_trigger);
-                outtake.setAngle(165);//raises outtake to hold freight
+                outtake.setAngle(140);//raises outtake to hold freight
             } else if (gamepad2.left_trigger > 0.01){ //lowers linear slide
                 linear.setPower(gamepad2.left_trigger);
                 outtake.setAngle(180);//drops outtake down to collect freight
@@ -173,12 +183,14 @@
                 linear.setPower(0.0);
             }
 
+
+            intakeSpinDir = (bumperRightHit1 || bumperRightHit2)? intakeSpinDir *= -1: intakeSpinDir;//toggles intake direction
             //intake spinner is toggled if b is pressed
             if (bHit1 || bHit2){
                 intakeToggle *= -1;
                 switch (intakeToggle){
                     case -1 :
-                        intake.setPower(0.8);
+                        intake.setPower(0.8 * intakeSpinDir);
                         break;
                     case 1 :
                         intake.setPower(0.0);
@@ -197,7 +209,8 @@
 
             // Drive the robot with joysticks if they are moved (with rates)
             if(Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
-                drivetrain.driveWithGamepad(1, rateCurve(rightY, 1.7),rateCurve(leftX, 1.7)/* 0.5*leftX */, rateCurve(rightX,1.7)); //curved stick rates
+                double multiplier = (isReversed)? -1: 1;
+                drivetrain.driveWithGamepad(1, rateCurve(rightY, 1.7),rateCurve(leftX, 1.7) * multiplier/* 0.5*leftX */, rateCurve(rightX,1.7)); //curved stick rates
             }else{
                 // If the joysticks are not pressed, do not move the bot
                 drivetrain.stop();
@@ -220,3 +233,13 @@
 
 
     }
+    /*
+     RRRRR           b            hh                                k     k          5555555 77777777 44    44  1111
+    R::::::R        b.b           h.h                              k.k   kk          5.5          7.7 4.4  4.4 1 1.1
+    R::RR:::R       b.b           h.h                              k.k  k.k  sssss   5.5         7.7  4.4  4.4   1.1
+    R::::::R   ooo  b..bbb   ooo  h..hhhh   aaa.a www    ww    www k.k.k.k  s.s      55555      7.7   4..44..4   1.1
+    R:R R::R  o.o.o b..b..b o.o.o h......h a..a..a w.w w.ww.w w.w  k.k.k     sssss       5.5   7.7         4.4   1.1
+    R:R  R::R o.o.o b..b..b o.o.o h.h  h.h a..a..a  w.w.w  w.w.w   k.k k.k      s.s      5.5  7.7          4.4   1.1
+    RRR   RRR  ooo   bbbb    ooo  hhh  hhh  aaa  aa  www    www    kk   k.k ssssss   555555  7.7           444 11111111
+   */
+

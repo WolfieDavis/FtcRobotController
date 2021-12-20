@@ -94,6 +94,7 @@ public class FreightDriveDemo extends OpMode {
         boolean bumperRightHit1 = bumperRight1 && !lastBumpers1.right_bumper;
 
 
+
         //outtake code
         if (y1){//flip the outake
             outtake.setAngle(45);
@@ -112,6 +113,9 @@ public class FreightDriveDemo extends OpMode {
         } else {
             linear.setPower(0.0);
         }
+
+        //reverse intake while held
+        intake.setPower((dpadUp1)? -intake.getPower(): intake.getPower());
 
         //intake spinner is toggled if b is pressed
         if (bHit1){
