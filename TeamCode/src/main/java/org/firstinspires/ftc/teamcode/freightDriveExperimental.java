@@ -37,6 +37,7 @@ public class freightDriveExperimental extends OpMode {
             linearUpPos = 16,
             linearStagedPos = 2,
             linearMinPos = 10,
+            linearGoToPosition = null;
             outtakeLinearTrip = 1, //the bucket tips up to hold stuff in when linear is moved above this point
             outtakeTravelPos = 120,
             outtakeCollectPos = 180,
@@ -74,12 +75,12 @@ public class freightDriveExperimental extends OpMode {
         intake = new DcMotorX(hardwareMap.dcMotor.get("intake"));//motor for intake spinner
         spinner = new DcMotorX(hardwareMap.dcMotor.get("spinner"));//motor for carousel spinner
         outtake = new ServoX(hardwareMap.servo.get("outtake"));//servo for outtake dropper
-//            linear.setLimits(hardwareMap.touchSensor.get("linearBtmLimit"), 12.0);
+//            linear.setLimits(hardwareMap.touchSensor.get("linearBtmLimit"), 12.0); //UNCOMMENT WITH LIMIT SWITCH
 
     }// end of init
 
     public void start(){
-        //            linear.reset();
+        //            linear.reset(); //UNCOMMENT WITH LIMIT SWITCH
         linear.resetEncoder();
         linear.setBrake(true);
         linear.controlVelocity();
@@ -142,33 +143,35 @@ public class freightDriveExperimental extends OpMode {
             isReversed = !isReversed;
         }//reverses the bot
 
+
         //code for the linear rail uses the values read by the trigger.
         if (gamepad2.right_trigger > 0.01 && linear.getPosition() > minLinearPos){ //raises the linear slide
             linear.controlVelocity();
             linear.setVelocity(-gamepad2.right_trigger);
-//                linear.setPosition(1.0, 0.7);
-//                outtake.setAngle(120);//raises outtake to hold freight
+            linearGoToPosition = null;
         } else if (gamepad2.left_trigger > 0.01 && linear.getPosition() < maxLinearPos){ //lowers linear slide
             linear.controlVelocity();
             linear.setVelocity(gamepad2.left_trigger);
-//                linear.setPosition(12.0, 0.7);
-//                outtake.setAngle(180);//drops outtake down to collect freight
-        } else if (dpadUp2) {
-            linear.controlPosition();
-            linear.setPosition(linearUpPos, 1);
-        } else if (dpadDown2) {
-            linear.controlPosition();
-            linear.setPosition(linearDownPos, 1);
-        } else if (dpadLeft2) {
-            linear.controlPosition();
-            linear.setPosition(linearMinPos, 1);
-        } else if (dpadRight2) {
-            linear.controlPosition();
-            linear.setPosition(linearStagedPos, 1);
+            linearGoToPosition = null;
+        } else if (dpadUpHit2) {
+            linearGoToPosition = linearUpPos;
+        } else if (dpadDownHit2) {
+            linearGoToPosition = linearDownPos;
+        } else if (dpadLeftHit2) {
+            linearGoToPosition = linearMinPos;
+        } else if (dpadRightHit2) {
+            linearGoToPosition = linearStagedPos;
         } else {
             linear.controlVelocity();
             linear.setVelocity(0.0);
         }
+
+
+        if (linearGoToPosition != null) {
+            linear.controlPosition();
+            linear.setPosition(linearGoToPosition); //THIS MIGHT NEED TO HAVE A 2nd ARG of 0.7 or 1 (the speed)
+        }
+
 
 
         //set bucket pos
@@ -176,8 +179,9 @@ public class freightDriveExperimental extends OpMode {
             outtake.setAngle(outtakeDumpPos);
         } else if (linear.getPosition() > outtakeLinearTrip){
             outtake.setAngle(outtakeTravelPos);
+        } else {
+            outtake.setAngle(outtakeCollectPos);
         }
-        else outtake.setAngle(outtakeCollectPos);
 
 
 
