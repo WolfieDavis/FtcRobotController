@@ -29,7 +29,7 @@ public class freightDriveExperimental extends OpMode {
     private ServoX
             outtake;
 
-    private double
+    private double 
             power = 1, //don't know
             //various positions the outake arm can be in, in inches from the bottom
             minLinearPos = 0.375, //the btm position of the outake (how far down it will go)
@@ -38,7 +38,7 @@ public class freightDriveExperimental extends OpMode {
             linearUpPos = 16, //the dump high position
             linearStagedPos = 2, //the ready to pick up position (but still have clearance)
             linearMidPos = 10, //the dump low position
-            linearGoToPos = null; // used to keep track of which position to go to
+            linearGoToPos = null, // used to keep track of which position to go to
             //bucket positions and trip point
             outtakeLinearTrip = 1, //the bucket tips up to hold stuff in when linear is moved above this point
             outtakeTravelPos = 120, //the bucket is in this angle when traveling
@@ -249,8 +249,10 @@ public class freightDriveExperimental extends OpMode {
         lastDpads2.update(dpadUp2, dpadDown2, dpadRight2, dpadLeft2);
         lastBumpers2.update(bumperRight2, bumperLeft2);
 
+    /* ------- print to telemetry (used for calibration/ trouble shooting) ------ */
+
         telemetry.addData("Data:", linear.getPosition());
-        telemetry.addData("Dpad up: ", dpadUp2);
+        // telemetry.addData("Dpad up: ", dpadUp2);
 
     }//end of loop
 
