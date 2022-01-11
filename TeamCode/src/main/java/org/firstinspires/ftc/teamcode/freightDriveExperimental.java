@@ -38,7 +38,7 @@ public class freightDriveExperimental extends OpMode {
             linearUpPos = 16, //the dump high position
             linearStagedPos = 2, //the ready to pick up position (but still have clearance)
             linearMidPos = 10, //the dump low position
-            linearGoToPos = null, // used to keep track of which position to go to
+            linearGoToPos = -1, // used to keep track of which position to go to
             //bucket positions and trip point
             outtakeLinearTrip = 1, //the bucket tips up to hold stuff in when linear is moved above this point
             outtakeTravelPos = 120, //the bucket is in this angle when traveling
@@ -154,11 +154,11 @@ public class freightDriveExperimental extends OpMode {
         if (gamepad2.right_trigger > 0.01 && linear.getPosition() > minLinearPos){
             linear.controlVelocity();                       //change to the appropriate control mode
             linear.setVelocity(-gamepad2.right_trigger);    // set the speed of the arm
-            linearGoToPosition = null;                      // cancel any automatic movement
+            linearGoToPosition = -1;                      // cancel any automatic movement
         } else if (gamepad2.left_trigger > 0.01 && linear.getPosition() < maxLinearPos){
             linear.controlVelocity();
             linear.setVelocity(gamepad2.left_trigger);
-            linearGoToPosition = null;
+            linearGoToPosition = -1;
 
         //if there is no manual movement...
         } else {
@@ -171,9 +171,10 @@ public class freightDriveExperimental extends OpMode {
                 linearGoToPos = linearMidPos;
             } else if (dpadRightHit2) {
                 linearGoToPos = linearStagedPos;
-
+            }
+            
             //if there is automatic movement requested (can be from current iteration OR from past iteration) go to the position
-            if (linearGoToPos != null) {
+            if (linearGoToPos != -1) {
                 linear.controlPosition();
                 //TODO: THIS MIGHT NEED TO HAVE A 2nd ARG of 0.7 or 1 (the speed)
                 linear.setPosition(linearGoToPos); 
