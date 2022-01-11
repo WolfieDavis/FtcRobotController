@@ -30,18 +30,20 @@ public class freightDriveExperimental extends OpMode {
             outtake;
 
     private double
-            power = 1,
-            minLinearPos = 0.375,
-            maxLinearPos = 15.875,
-            linearDownPos = 0, //the pos to run to when dpad is used
-            linearUpPos = 16,
-            linearStagedPos = 2,
-            linearMinPos = 10,
-            linearGoToPosition = null;
+            power = 1, //don't know
+            //various positions the outake arm can be in, in inches from the bottom
+            minLinearPos = 0.375, //the btm position of the outake (how far down it will go)
+            maxLinearPos = 15.875, // the top position of the outake (how far up it will go)
+            linearDownPos = 0, //the pick stuff up position
+            linearUpPos = 16, //the dump high position
+            linearStagedPos = 2, //the ready to pick up position (but still have clearance)
+            linearMidPos = 10, //the dump low position
+            linearGoToPos = null; // used to keep track of which position to go to
+            //bucket positions and trip point
             outtakeLinearTrip = 1, //the bucket tips up to hold stuff in when linear is moved above this point
-            outtakeTravelPos = 120,
-            outtakeCollectPos = 180,
-            outtakeDumpPos = 45;
+            outtakeTravelPos = 120, //the bucket is in this angle when traveling
+            outtakeCollectPos = 180, //the bucket is in this position when collecting
+            outtakeDumpPos = 45; //the bucket is in this position when dumping
 //        private TouchSensor spinLimit,
 //                linearBtmLimit;
     //limit switch is named spinLimit
@@ -80,13 +82,14 @@ public class freightDriveExperimental extends OpMode {
     }// end of init
 
     public void start(){
-        //            linear.reset(); //UNCOMMENT WITH LIMIT SWITCH
-        linear.resetEncoder();
-        linear.setBrake(true);
-        linear.controlVelocity();
+        //            linear.reset(); //TODO: UNCOMMENT WITH LIMIT SWITCH
+        linear.resetEncoder(); //assuming the outake arm is at the btm, set the encoder to 0
+        linear.setBrake(true); //so that the outake motor arm will hold pos and won't "bounce"
     }
 
     public void loop(){
+
+    /* ------------- define variables to keep track of the controls ------------- */
 
         //joystick values for driving.
         double leftX = gamepad1.left_stick_x;
@@ -137,54 +140,68 @@ public class freightDriveExperimental extends OpMode {
         boolean bumperLeftHit2 = bumperLeft2 && !lastBumpers2.left_bumper;
         boolean bumperRightHit2 = bumperRight2 && !lastBumpers2.right_bumper;
 
-        //do we want this? does it work?
+
+
+    /* --------- reverse the bot if d pad up on controller 1 is pressed --------- */
         if(dpadUpHit1){
             drivetrain.reverse();
             isReversed = !isReversed;
         }//reverses the bot
 
 
-        //code for the linear rail uses the values read by the trigger.
-        if (gamepad2.right_trigger > 0.01 && linear.getPosition() > minLinearPos){ //raises the linear slide
-            linear.controlVelocity();
-            linear.setVelocity(-gamepad2.right_trigger);
-            linearGoToPosition = null;
-        } else if (gamepad2.left_trigger > 0.01 && linear.getPosition() < maxLinearPos){ //lowers linear slide
+    /* ------------- move the outake linear slide ( called "linear") ------------ */
+        // first check if the triggers have been pressed (for manual movement). if they have been and the arm is not at the end of its travel, move the arm at the speed indicated by the trigger.
+        if (gamepad2.right_trigger > 0.01 && linear.getPosition() > minLinearPos){
+            linear.controlVelocity();                       //change to the appropriate control mode
+            linear.setVelocity(-gamepad2.right_trigger);    // set the speed of the arm
+            linearGoToPosition = null;                      // cancel any automatic movement
+        } else if (gamepad2.left_trigger > 0.01 && linear.getPosition() < maxLinearPos){
             linear.controlVelocity();
             linear.setVelocity(gamepad2.left_trigger);
             linearGoToPosition = null;
-        } else if (dpadUpHit2) {
-            linearGoToPosition = linearUpPos;
-        } else if (dpadDownHit2) {
-            linearGoToPosition = linearDownPos;
-        } else if (dpadLeftHit2) {
-            linearGoToPosition = linearMinPos;
-        } else if (dpadRightHit2) {
-            linearGoToPosition = linearStagedPos;
+
+        //if there is no manual movement...
         } else {
-            linear.controlVelocity();
-            linear.setVelocity(0.0);
+            //check the dpad for automatic movement requests, and record the position requested in the linearGoToPos variable. recording the requested position like this means the driver doesn't have to keep the dpad depressed until the movement is finished, they can just press and release it.
+            if (dpadUpHit2) {
+                linearGoToPos = linearUpPos;
+            } else if (dpadDownHit2) {
+                linearGoToPos = linearDownPos;
+            } else if (dpadLeftHit2) {
+                linearGoToPos = linearMidPos;
+            } else if (dpadRightHit2) {
+                linearGoToPos = linearStagedPos;
+
+            //if there is automatic movement requested (can be from current iteration OR from past iteration) go to the position
+            if (linearGoToPos != null) {
+                linear.controlPosition();
+                //TODO: THIS MIGHT NEED TO HAVE A 2nd ARG of 0.7 or 1 (the speed)
+                linear.setPosition(linearGoToPos); 
+
+            //finally if no manual control was requested AND there is no automatic control, set the velocity to 0
+            } else { 
+                linear.controlVelocity();
+                linear.setVelocity(0.0);
+            }
         }
 
 
-        if (linearGoToPosition != null) {
-            linear.controlPosition();
-            linear.setPosition(linearGoToPosition); //THIS MIGHT NEED TO HAVE A 2nd ARG of 0.7 or 1 (the speed)
-        }
-
-
-
-        //set bucket pos
-        if (y1||y2){//flip the outake
+        
+    /* ------------------------- set the bucket position ------------------------ */
+        if (y1||y2){ // if a "dump"  has been requested
             outtake.setAngle(outtakeDumpPos);
-        } else if (linear.getPosition() > outtakeLinearTrip){
+
+        //if the bucket is in the upper section of the arm (traveling or dumping position) tip it back a little to keep stuff from falling out
+        } else if (linear.getPosition() > outtakeLinearTrip){ 
             outtake.setAngle(outtakeTravelPos);
+        
+        //if the bucket is in the lower section of the arm tip it down to the collecting position
         } else {
             outtake.setAngle(outtakeCollectPos);
         }
 
 
-
+    /* -------------- set the intake spinner direction / on / off -------------- */
         intakeSpinDir = (bumperRightHit1 || bumperRightHit2)? intakeSpinDir *= -1: intakeSpinDir;//toggles intake direction
         //intake spinner is toggled if b is pressed
         if (bHit1 || bHit2){
@@ -199,6 +216,8 @@ public class freightDriveExperimental extends OpMode {
             }//end of switch case
         }
 
+    
+    /* -------------- set the carousel spinner direction / on / off ------------- */
         spinDirection = (bumperLeftHit1 || bumperLeftHit2)? spinDirection *= -1: spinDirection; //reverse the direction if left bumper  is pressed
         //carousel spinner triggered w/ a press
         if(a1 || a2){
@@ -207,7 +226,8 @@ public class freightDriveExperimental extends OpMode {
             spinner.setPower(0);
         }
 
-
+    
+    /* ------------------------- control the drivetrain ------------------------- */
         // Drive the robot with joysticks if they are moved (with rates)
         if(Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
             double multiplier = (isReversed)? -1: 1;
@@ -217,6 +237,9 @@ public class freightDriveExperimental extends OpMode {
             drivetrain.stop();
         }
 
+
+    /* ------------- record button states, to be used in determining ------------ */
+    /* ------------------- "pressed" vs "held" and "released" ------------------- */
         // Save button states
         lastButtons1.update(a1, b1, x1, y1);
         lastDpads1.update(dpadUp1, dpadDown1, dpadRight1, dpadLeft1);
@@ -231,6 +254,7 @@ public class freightDriveExperimental extends OpMode {
 
     }//end of loop
 
+    /* ------------------ used to "curve" the joystick input ------------------ */
     private double rateCurve(double input, double rate){
         return Math.pow(Math.abs(input),rate)*((input>0)?1:-1);
     }
