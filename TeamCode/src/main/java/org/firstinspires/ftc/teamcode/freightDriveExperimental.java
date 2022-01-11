@@ -154,11 +154,11 @@ public class freightDriveExperimental extends OpMode {
         if (gamepad2.right_trigger > 0.01 && linear.getPosition() > minLinearPos){
             linear.controlVelocity();                       //change to the appropriate control mode
             linear.setVelocity(-gamepad2.right_trigger);    // set the speed of the arm
-            linearGoToPosition = -1;                      // cancel any automatic movement
+            linearGoToPos = -1;                      // cancel any automatic movement
         } else if (gamepad2.left_trigger > 0.01 && linear.getPosition() < maxLinearPos){
             linear.controlVelocity();
             linear.setVelocity(gamepad2.left_trigger);
-            linearGoToPosition = -1;
+            linearGoToPos = -1;
 
         //if there is no manual movement...
         } else {
@@ -172,7 +172,7 @@ public class freightDriveExperimental extends OpMode {
             } else if (dpadRightHit2) {
                 linearGoToPos = linearStagedPos;
             }
-            
+
             //if there is automatic movement requested (can be from current iteration OR from past iteration) go to the position
             if (linearGoToPos != -1) {
                 linear.controlPosition();
