@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.api.State;
  */
 
 @TeleOp
-public class freightDriveExperimental extends OpMode {
+public class freightDrive3 extends OpMode {
 
 
     private Drivetrain drivetrain;
@@ -29,11 +29,11 @@ public class freightDriveExperimental extends OpMode {
     private ServoX
             outtake;
 
-    private double 
+    private double
             power = 1, //don't know
             //various positions the outake arm can be in, in inches from the bottom
             minLinearPos = 0.375, //the btm position of the outake (how far down it will go)
-            maxLinearPos = 15.875, // the top position of the outake (how far up it will go)
+            maxLinearPos = 13.875,//15.875 - the top position of the outake (how far up it will go)
             linearDownPos = 0, //the pick stuff up position
             linearUpPos = 16, //the dump high position
             linearStagedPos = 2, //the ready to pick up position (but still have clearance)
@@ -41,9 +41,9 @@ public class freightDriveExperimental extends OpMode {
             linearGoToPos = -1, // used to keep track of which position to go to
             //bucket positions and trip point
             outtakeLinearTrip = 1, //the bucket tips up to hold stuff in when linear is moved above this point
-            outtakeTravelPos = 120, //the bucket is in this angle when traveling
-            outtakeCollectPos = 180, //the bucket is in this position when collecting
-            outtakeDumpPos = 45; //the bucket is in this position when dumping
+            outtakeTravelPos = 125, //120 - the bucket is in this angle when traveling
+            outtakeCollectPos = 175, //180 - 178 is too low, 175 is too high - the bucket is in this position when collecting
+            outtakeDumpPos = 80; //100, 45 - the bucket is in this position when dumping
 //        private TouchSensor spinLimit,
 //                linearBtmLimit;
     //limit switch is named spinLimit
@@ -73,7 +73,7 @@ public class freightDriveExperimental extends OpMode {
         drivetrain = new Drivetrain(mRF, mLF, mRB, mLB);
 
 
-        linear = new LimitedMotorX(hardwareMap.dcMotor.get("linear"), 2900, 16.25);//motor for linear rail
+        linear = new LimitedMotorX(hardwareMap.dcMotor.get("linear"), 1968, 16.25);// 2900, 16.25 motor for linear rail
         intake = new DcMotorX(hardwareMap.dcMotor.get("intake"));//motor for intake spinner
         spinner = new DcMotorX(hardwareMap.dcMotor.get("spinner"));//motor for carousel spinner
         outtake = new ServoX(hardwareMap.servo.get("outtake"));//servo for outtake dropper
@@ -151,13 +151,13 @@ public class freightDriveExperimental extends OpMode {
 
     /* ------------- move the outake linear slide ( called "linear") ------------ */
         // first check if the triggers have been pressed (for manual movement). if they have been and the arm is not at the end of its travel, move the arm at the speed indicated by the trigger.
-        if (gamepad2.right_trigger > 0.01 && linear.getPosition() > minLinearPos){
+        if (gamepad2.right_trigger > 0.01 && linear.getPosition() < maxLinearPos){
             linear.controlVelocity();                       //change to the appropriate control mode
-            linear.setVelocity(-gamepad2.right_trigger);    // set the speed of the arm
+            linear.setVelocity(gamepad2.right_trigger);    // set the speed of the arm
             linearGoToPos = -1;                      // cancel any automatic movement
-        } else if (gamepad2.left_trigger > 0.01 && linear.getPosition() < maxLinearPos){
+        } else if (gamepad2.left_trigger > 0.01 && linear.getPosition() > minLinearPos){
             linear.controlVelocity();
-            linear.setVelocity(gamepad2.left_trigger);
+            linear.setVelocity(-gamepad2.left_trigger);
             linearGoToPos = -1;
 
         //if there is no manual movement...
