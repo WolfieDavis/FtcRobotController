@@ -85,6 +85,7 @@ public class freightDrive3 extends OpMode {
         //            linear.reset(); //TODO: UNCOMMENT WITH LIMIT SWITCH
         linear.resetEncoder(); //assuming the outake arm is at the btm, set the encoder to 0
         linear.setBrake(true); //so that the outake motor arm will hold pos and won't "bounce"
+        linear.controlVelocity();
     }
 
     public void loop(){
@@ -152,11 +153,11 @@ public class freightDrive3 extends OpMode {
     /* ------------- move the outake linear slide ( called "linear") ------------ */
         // first check if the triggers have been pressed (for manual movement). if they have been and the arm is not at the end of its travel, move the arm at the speed indicated by the trigger.
         if (gamepad2.right_trigger > 0.01 && linear.getPosition() < maxLinearPos){
-            linear.controlVelocity();                       //change to the appropriate control mode
+            // linear.controlVelocity();                       //change to the appropriate control mode
             linear.setVelocity(gamepad2.right_trigger);    // set the speed of the arm
             linearGoToPos = -1;                      // cancel any automatic movement
         } else if (gamepad2.left_trigger > 0.01 && linear.getPosition() > minLinearPos){
-            linear.controlVelocity();
+            // linear.controlVelocity();
             linear.setVelocity(-gamepad2.left_trigger);
             linearGoToPos = -1;
 
@@ -175,13 +176,14 @@ public class freightDrive3 extends OpMode {
 
             //if there is automatic movement requested (can be from current iteration OR from past iteration) go to the position
             if (linearGoToPos != -1) {
-                linear.controlPosition();
+                // linear.controlPosition();
                 //TODO: THIS MIGHT NEED TO HAVE A 2nd ARG of 0.7 or 1 (the speed)
-                linear.setPosition(linearGoToPos, 0.7); //does this work now if I add a comment
+                // linear.setPosition(linearGoToPos, 0.7); //does this work now if I add a comment
+                linear.setVelocity(fakePid(linear, linearGoToPos, 100)); //change the 3rd arg to adjust slow down speed, should be >1
 
             //finally if no manual control was requested AND there is no automatic control, set the velocity to 0
             } else {
-                linear.controlVelocity();
+                // linear.controlVelocity();
                 linear.setVelocity(0.0);
             }
         }
@@ -260,6 +262,13 @@ public class freightDrive3 extends OpMode {
     /* ------------------ used to "curve" the joystick input ------------------ */
     private double rateCurve(double input, double rate){
         return Math.pow(Math.abs(input),rate)*((input>0)?1:-1);
+    }
+
+    /* ---------- used to slow a motor down when approching target pos ---------- */
+    /* ------------- returns (distance left to travel)^(1/adjuster) ------------- */
+    private double fakePid(DcMotorX motor, double targetPos, double adjuster){
+        double currentPos = motor.getPosition();
+        return Math.pow(Math.abs(targetPos - currentPos),1.0/adjuster)*(currentPos < targetPos? 1:-1);
     }
 
 
