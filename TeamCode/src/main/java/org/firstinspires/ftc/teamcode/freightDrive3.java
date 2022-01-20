@@ -179,7 +179,7 @@ public class freightDrive3 extends OpMode {
                 // linear.controlPosition();
                 //TODO: THIS MIGHT NEED TO HAVE A 2nd ARG of 0.7 or 1 (the speed)
                 // linear.setPosition(linearGoToPos, 0.7); //does this work now if I add a comment
-                linear.setVelocity(fakePid(linear, linearGoToPos, 100)); //change the 3rd arg to adjust slow down speed, should be >1
+                linear.setVelocity(fakePid(linear, linearGoToPos, 100, 0.25)); //change the 3rd arg to adjust slow down speed, should be >1
 
             //finally if no manual control was requested AND there is no automatic control, set the velocity to 0
             } else {
@@ -266,9 +266,14 @@ public class freightDrive3 extends OpMode {
 
     /* ---------- used to slow a motor down when approching target pos ---------- */
     /* ------------- returns (distance left to travel)^(1/adjuster) ------------- */
-    private double fakePid(DcMotorX motor, double targetPos, double adjuster){
+    private double fakePid(DcMotorX motor, double targetPos, double adjuster, double stopTolerance){
         double currentPos = motor.getPosition();
-        return Math.pow(Math.abs(targetPos - currentPos),1.0/adjuster)*(currentPos < targetPos? 1:-1);
+        double distanceToMove = Math.abs(targetPos - currentPos);
+        if (distanceToMove > stopTolerance){
+            return Math.pow(distanceToMove,1.0/adjuster)*(currentPos < targetPos? 1:-1);
+        } else {
+            return 0.0;
+        }
     }
 
 
