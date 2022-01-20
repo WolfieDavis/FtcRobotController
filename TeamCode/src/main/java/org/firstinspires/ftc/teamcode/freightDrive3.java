@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.api.State;
  * Robohawks ftc team 5741
  * Drive code for driver controlled period
  * contributers: Wolfie Davis, Crawford Phillips, Will Sprigg
- * ruined by: Cailean Sorce
+ * ruined by: Cailean Sorce, and Wolfie Davis too
  */
 
 @TeleOp
@@ -177,25 +177,25 @@ public class freightDrive3 extends OpMode {
             if (linearGoToPos != -1) {
                 linear.controlPosition();
                 //TODO: THIS MIGHT NEED TO HAVE A 2nd ARG of 0.7 or 1 (the speed)
-                linear.setPosition(linearGoToPos); 
+                linear.setPosition(linearGoToPos, 0.7); //does this work now if I add a comment
 
             //finally if no manual control was requested AND there is no automatic control, set the velocity to 0
-            } else { 
+            } else {
                 linear.controlVelocity();
                 linear.setVelocity(0.0);
             }
         }
 
 
-        
+
     /* ------------------------- set the bucket position ------------------------ */
         if (y1||y2){ // if a "dump"  has been requested
             outtake.setAngle(outtakeDumpPos);
 
         //if the bucket is in the upper section of the arm (traveling or dumping position) tip it back a little to keep stuff from falling out
-        } else if (linear.getPosition() > outtakeLinearTrip){ 
+        } else if (linear.getPosition() > outtakeLinearTrip){
             outtake.setAngle(outtakeTravelPos);
-        
+
         //if the bucket is in the lower section of the arm tip it down to the collecting position
         } else {
             outtake.setAngle(outtakeCollectPos);
@@ -217,7 +217,7 @@ public class freightDrive3 extends OpMode {
             }//end of switch case
         }
 
-    
+
     /* -------------- set the carousel spinner direction / on / off ------------- */
         spinDirection = (bumperLeftHit1 || bumperLeftHit2)? spinDirection *= -1: spinDirection; //reverse the direction if left bumper  is pressed
         //carousel spinner triggered w/ a press
@@ -227,7 +227,7 @@ public class freightDrive3 extends OpMode {
             spinner.setPower(0);
         }
 
-    
+
     /* ------------------------- control the drivetrain ------------------------- */
         // Drive the robot with joysticks if they are moved (with rates)
         if(Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
