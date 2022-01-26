@@ -27,7 +27,10 @@ public class freightDrive3 extends OpMode {
             intake;
     private LimitedMotorX linear;
     private ServoX
-            outtake;
+            outtake,
+            odoL,
+            odoR,
+            odoB;
 
     private double
             power = 1, //don't know
@@ -35,9 +38,9 @@ public class freightDrive3 extends OpMode {
             minLinearPos = 0.375, //the btm position of the outake (how far down it will go)
             maxLinearPos = 13.875,//15.875 - the top position of the outake (how far up it will go)
             linearDownPos = 0, //the pick stuff up position
-            linearUpPos = 16, //the dump high position
+            linearUpPos = 13.875, //the dump high position
             linearStagedPos = 2, //the ready to pick up position (but still have clearance)
-            linearMidPos = 10, //the dump low position
+            linearMidPos = 9, //the dump low position
             linearGoToPos = -1, // used to keep track of which position to go to
             //bucket positions and trip point
             outtakeLinearTrip = 1, //the bucket tips up to hold stuff in when linear is moved above this point
@@ -77,7 +80,14 @@ public class freightDrive3 extends OpMode {
         intake = new DcMotorX(hardwareMap.dcMotor.get("intake"));//motor for intake spinner
         spinner = new DcMotorX(hardwareMap.dcMotor.get("spinner"));//motor for carousel spinner
         outtake = new ServoX(hardwareMap.servo.get("outtake"));//servo for outtake dropper
+        odoL = new ServoX(hardwareMap.servo.get("odoL"));
+        odoR = new ServoX(hardwareMap.servo.get("odoR"));
+        odoB = new ServoX(hardwareMap.servo.get("odoB"));
 //            linear.setLimits(hardwareMap.touchSensor.get("linearBtmLimit"), 12.0); //UNCOMMENT WITH LIMIT SWITCH
+
+        odoL.setAngle(180);
+        odoR.setAngle(180);
+        odoB.setAngle(180);
 
     }// end of init
 
@@ -164,22 +174,22 @@ public class freightDrive3 extends OpMode {
         //if there is no manual movement...
         } else {
             //check the dpad for automatic movement requests, and record the position requested in the linearGoToPos variable. recording the requested position like this means the driver doesn't have to keep the dpad depressed until the movement is finished, they can just press and release it.
-            if (dpadUpHit2) {
-                linearGoToPos = linearUpPos;
-            } else if (dpadDownHit2) {
-                linearGoToPos = linearDownPos;
-            } else if (dpadLeftHit2) {
-                linearGoToPos = linearMidPos;
-            } else if (dpadRightHit2) {
-                linearGoToPos = linearStagedPos;
-            }
+//            if (dpadUpHit2) {
+//                linearGoToPos = linearUpPos;
+//            } else if (dpadDownHit2) {
+//                linearGoToPos = linearDownPos;
+//            } else if (dpadLeftHit2) {
+//                linearGoToPos = linearMidPos;
+//            } else if (dpadRightHit2) {
+//                linearGoToPos = linearStagedPos;
+//            }
 
             //if there is automatic movement requested (can be from current iteration OR from past iteration) go to the position
             if (linearGoToPos != -1) {
-                // linear.controlPosition();
+                //linear.controlPosition();
                 //TODO: THIS MIGHT NEED TO HAVE A 2nd ARG of 0.7 or 1 (the speed)
                 // linear.setPosition(linearGoToPos, 0.7); //does this work now if I add a comment
-                linear.setVelocity(fakePid(linear, linearGoToPos, 100, 0.25)); //change the 3rd arg to adjust slow down speed, should be >1
+                linear.setVelocity(fakePid(linear, linearGoToPos, 0.8, 50, 0.5)); //change the 3rd arg to adjust slow down speed, should be >1
 
             //finally if no manual control was requested AND there is no automatic control, set the velocity to 0
             } else {
@@ -203,6 +213,17 @@ public class freightDrive3 extends OpMode {
             outtake.setAngle(outtakeCollectPos);
         }
 
+    /* ------------------------- odometry pods up and down test ------------------------ */
+
+        if (dpadUpHit2) { //up
+            odoL.setAngle(180);
+            odoR.setAngle(180);
+            odoB.setAngle(180);
+        } else if (dpadDownHit2) { //down
+            odoL.setAngle(0);
+            odoR.setAngle(0);
+            odoB.setAngle(0);
+        }
 
     /* -------------- set the intake spinner direction / on / off -------------- */
         intakeSpinDir = (bumperRightHit1 || bumperRightHit2)? intakeSpinDir *= -1: intakeSpinDir;//toggles intake direction
@@ -266,15 +287,15 @@ public class freightDrive3 extends OpMode {
 
     /* ---------- used to slow a motor down when approching target pos ---------- */
     /* ------------- returns (distance left to travel)^(1/adjuster) ------------- */
-    private double fakePid(DcMotorX motor, double targetPos, double adjuster, double stopTolerance){
-        double currentPos = motor.getPosition();
-        double distanceToMove = Math.abs(targetPos - currentPos);
-        if (distanceToMove > stopTolerance){
-            return Math.pow(distanceToMove,1.0/adjuster)*(currentPos < targetPos? 1:-1);
-        } else {
-            return 0.0;
-        }
-    }
+            private double fakePid(DcMotorX motor, double targetPos, double speed, double adjuster, double stopTolerance){
+                double currentPos = motor.getPosition();
+                double distanceToMove = Math.abs(targetPos - currentPos);
+                if (distanceToMove > stopTolerance){
+                    return Math.pow(distanceToMove,speed/adjuster)*(currentPos < targetPos? 1:-1);
+                } else {
+                    return 0.0;
+                }
+            }
 
 
 }

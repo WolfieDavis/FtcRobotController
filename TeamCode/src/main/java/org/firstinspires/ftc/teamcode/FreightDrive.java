@@ -21,7 +21,7 @@
     * contributers: Wolfie Davis, Crawford Phillips, Will Sprigg
     */
 
-    @TeleOp
+    //@TeleOp
     public class FreightDrive extends OpMode {
 
 

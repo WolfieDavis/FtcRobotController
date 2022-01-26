@@ -22,7 +22,7 @@ import org.firstinspires.ftc.teamcode.api.State;
 *   that have been added to the bot.
 */
 
-@TeleOp
+//@TeleOp
 public class FreightDriveDemo extends OpMode {
 
 
