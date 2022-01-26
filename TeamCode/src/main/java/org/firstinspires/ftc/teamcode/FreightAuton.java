@@ -9,6 +9,12 @@ import org.firstinspires.ftc.teamcode.api.LimitedMotorX;
 import org.firstinspires.ftc.teamcode.api.Odometry;
 import org.firstinspires.ftc.teamcode.api.ServoX;
 
+
+
+/*
+
+
+
 //@Autonomous
 public class FreightAuton extends LinearOpMode {
 
@@ -21,6 +27,7 @@ public class FreightAuton extends LinearOpMode {
     private double backDistancePerRadian = -41.577 / (2 * Math.PI); //TODO: figure out what this math means
 
 //    private final double TILE_SIZE = 60.96; //NO we're not measuring in fractional tiles this year, SAE is enough as it is
+
 
     drivetrain =new
 
@@ -80,3 +87,9 @@ public class FreightAuton extends LinearOpMode {
 
     }//end of runOpMode
 }//end of linear op mode
+
+
+
+
+
+*/
