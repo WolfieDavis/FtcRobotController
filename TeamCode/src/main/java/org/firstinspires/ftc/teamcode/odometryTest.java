@@ -66,7 +66,7 @@ public class odometryTest extends OpMode {
                 new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, circumference),
                 new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, circumference),
                 50,
-                40.8 / (2 * Math.PI), //-41.577 / (2 * Math.PI)    //6.15 cm from the middle
+                -41.577 / (2 * Math.PI), // old: -41.577 / (2 * Math.PI)  //6.15 cm from the middle for old   //19.2 cm from the middle for new
                 40.8, //cm between side odometry wheels
                 0, //set to 0 as in auto from last year - in documentation they were set to 5
                 0,
