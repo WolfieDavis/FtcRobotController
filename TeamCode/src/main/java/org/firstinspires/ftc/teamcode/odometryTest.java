@@ -49,36 +49,31 @@ public class odometryTest extends OpMode {
                 mRB = new DcMotorX(hardwareMap.dcMotor.get("mRB")),
                 mLB = new DcMotorX(hardwareMap.dcMotor.get("mLB"));
 
-//        // Odometry wheels
-//        wheelR = new DcMotorX(hardwareMap.dcMotor.get("mRB"), ticksPerRev, circumference);
-//        wheelL = new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, circumference);
-//        wheelB = new DcMotorX(hardwareMap.dcMotor.get("mRF"), ticksPerRev, circumference);
-
         //servos to raise and lower the odometry pods
         odoL = new ServoX(hardwareMap.servo.get("odoL"));
         odoR = new ServoX(hardwareMap.servo.get("odoR"));
         odoB = new ServoX(hardwareMap.servo.get("odoB"));
 
         //raise the pods up at the start of driver controlled to make sure they're up
-        odoL.setAngle(180);
-        odoR.setAngle(180);
-        odoB.setAngle(180);
+//        odoL.setAngle(180);
+//        odoR.setAngle(180);
+//        odoB.setAngle(180);
 
         //odometry initialization code
         Odometry positionTracker = new Odometry(
 //                wheelR, wheelL, wheelB,
-                new DcMotorX(hardwareMap.dcMotor.get("wheelR"), ticksPerRev, circumference),
-                new DcMotorX(hardwareMap.dcMotor.get("wheelL"), ticksPerRev, circumference),
-                new DcMotorX(hardwareMap.dcMotor.get("wheelB"), ticksPerRev, circumference),
+                new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, circumference),
+                new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, circumference),
+                new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, circumference),
                 50,
-                -41.577 / (2 * Math.PI),
+                40.8 / (2 * Math.PI), //-41.577 / (2 * Math.PI)    //6.15 cm from the middle
                 40.8, //cm between side odometry wheels
                 0, //set to 0 as in auto from last year - in documentation they were set to 5
                 0,
                 0
         );
         drivetrain = new ControlledDrivetrain(mRF, mLF, mRB, mLB, positionTracker);
-//        drivetrain.reverse();
+        drivetrain.reverse();
         drivetrain.telemetry = telemetry;        // Adding logging to drivetrain (only needed for development)
         drivetrain.setActive(false);        // Start with the drivetrain off
         Thread positionTracking = new Thread(drivetrain);
@@ -133,11 +128,16 @@ public class odometryTest extends OpMode {
         /* ------------------------- control the drivetrain ------------------------- */
         // Drive the robot with joysticks if they are moved (with rates)
         if (Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
-            double multiplier = 1;
-            drivetrain.driveWithGamepad(1, rateCurve(rightY, 1.7), rateCurve(leftX, 1.7) * multiplier/* 0.5*leftX */, rateCurve(rightX, 1.7)); //curved stick rates
+            double multiplier = -1;
+            drivetrain.driveWithGamepad(0.5, rateCurve(rightY, 1.7), rateCurve(leftX, 1.7) * multiplier/* 0.5*leftX */, rateCurve(rightX, 1.7)); //curved stick rates
         } else {
             // If the joysticks are not pressed, do not move the bot
             drivetrain.stop();
+        }
+
+        if(gamepad1.right_stick_button){
+            // Reset odometry to prevent error buildup
+            drivetrain.positionTracker.reset(0, 0, 0);
         }
 
 
@@ -149,9 +149,6 @@ public class odometryTest extends OpMode {
 
 
         /* ------- print to telemetry (used for calibration/ trouble shooting) ------ */
-//        telemetry.addData("x", odo.x); // Get the robot's current x coordinate
-//        telemetry.addData("y", odo.y); // Get the robot's current y coordinate
-//        telemetry.addData("heading", odo.phi); // Get the robot's current heading
         telemetry.addData("x", drivetrain.positionTracker.x); // Get the robot's current x coordinate
         telemetry.addData("y", drivetrain.positionTracker.y); // Get the robot's current y coordinate
         telemetry.addData("heading", drivetrain.positionTracker.phi); // Get the robot's current heading
