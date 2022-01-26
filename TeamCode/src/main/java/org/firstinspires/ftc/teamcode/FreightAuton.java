@@ -3,35 +3,25 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.api.ControlledDrivetrain;
 import org.firstinspires.ftc.teamcode.api.DcMotorX;
 import org.firstinspires.ftc.teamcode.api.Drivetrain;
 import org.firstinspires.ftc.teamcode.api.LimitedMotorX;
 import org.firstinspires.ftc.teamcode.api.Odometry;
 import org.firstinspires.ftc.teamcode.api.ServoX;
 
-
-
-/*
-
-
-
-//@Autonomous
+@Autonomous
 public class FreightAuton extends LinearOpMode {
-
-    private Drivetrain drivetrain;
 
     // Odometry parameters
     private int ticksPerRev = 8192; //left same as last year
     private double circumference = 15.71; //left same as last year
     private double width = 26.9; //distance between centers of odometry wheels
-    private double backDistancePerRadian = -41.577 / (2 * Math.PI); //TODO: figure out what this math means
+    private double backDistancePerRadian = 0 / (2 * Math.PI); //TODO: test to see what this is - rotate bot 360 - take the x value and put it over 2pi - it compensates fo the wheel being in the back of the bot
 
 //    private final double TILE_SIZE = 60.96; //NO we're not measuring in fractional tiles this year, SAE is enough as it is
 
-
-    drivetrain =new
-
-    Drivetrain(mRF, mLF, mRB, mLB);
+    private ControlledDrivetrain drivetrain;
 
     private DcMotorX
             mRF,
@@ -66,30 +56,44 @@ public class FreightAuton extends LinearOpMode {
         // Create an odometry instance for the drivetrain
         Odometry positionTracker = new Odometry(wheelR, wheelL, wheelB, 50, backDistancePerRadian, width, 0, 0, 0);
 
+        // sets up drivetrain
+        drivetrain = new ControlledDrivetrain(mRF, mLF, mRB, mLB, positionTracker);
+        drivetrain.reverse();
+        drivetrain.telemetry = telemetry;
+
         //TODO: add linear slide limits and code in here if we are using it
 
         telemetry.addData("Done initializing", "");
         telemetry.update();
 
-        waitForStart();
+      waitForStart();
+
+        Thread drivetrainThread = new Thread(drivetrain); // Run it in a separate thread
+        drivetrainThread.start(); // Start the thread
+
+        //drop odometry pods
+        odoL.setAngle(0);
+        odoR.setAngle(0);
+        odoB.setAngle(0);
 
 
-//        private double fakePid (DcMotorX motor,double targetPos, double speed, double adjuster,
-//        double stopTolerance){
-//            double currentPos = motor.getPosition();
-//            double distanceToMove = Math.abs(targetPos - currentPos);
-//            if (distanceToMove > stopTolerance) {
-//                return Math.pow(distanceToMove, speed / adjuster) * (currentPos < targetPos ? 1 : -1);
-//            } else {
-//                return 0.0;
-//            }
-//        }
+        //TODO: call code that makes it go forward and stuff up here
 
+
+        //code at the end of auto that shuts everything down
+        drivetrain.setBrake(true);
+        drivetrain.stop();
+        drivetrain.setActive(false);
+        drivetrain.stopController();
     }//end of runOpMode
+
+
+    //TODO: write code that makes it go forward and stuff down here
+
+
 }//end of linear op mode
 
 
 
 
 
-*/

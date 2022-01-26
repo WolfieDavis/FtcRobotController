@@ -64,10 +64,10 @@ public class odometryTest extends OpMode {
 //                wheelR, wheelL, wheelB,
                 new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, circumference),
                 new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, circumference),
-                new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, circumference),
+                new DcMotorX(hardwareMap.dcMotor.get("mLB"), 0, circumference),
                 50,
-                -41.577 / (2 * Math.PI), // old: -41.577 / (2 * Math.PI)  //6.15 cm from the middle for old   //19.2 cm from the middle for new
-                40.8, //cm between side odometry wheels
+                0 / (2 * Math.PI), // old: -41.577 / (2 * Math.PI)  //6.15 cm from the middle for old   //19.2 cm from the middle for new
+                26.9, //cm between side odometry wheels
                 0, //set to 0 as in auto from last year - in documentation they were set to 5
                 0,
                 0
@@ -129,7 +129,7 @@ public class odometryTest extends OpMode {
         // Drive the robot with joysticks if they are moved (with rates)
         if (Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
             double multiplier = -1;
-            drivetrain.driveWithGamepad(0.5, rateCurve(rightY, 1.7), rateCurve(leftX, 1.7) * multiplier/* 0.5*leftX */, rateCurve(rightX, 1.7)); //curved stick rates
+            drivetrain.driveWithGamepad(0.2, rateCurve(-rightY, 1.7), rateCurve(leftX, 1.7) * multiplier/* 0.5*leftX */, rateCurve(rightX, 1.7)); //curved stick rates
         } else {
             // If the joysticks are not pressed, do not move the bot
             drivetrain.stop();
@@ -152,6 +152,7 @@ public class odometryTest extends OpMode {
         telemetry.addData("x", drivetrain.positionTracker.x); // Get the robot's current x coordinate
         telemetry.addData("y", drivetrain.positionTracker.y); // Get the robot's current y coordinate
         telemetry.addData("heading", drivetrain.positionTracker.phi); // Get the robot's current heading
+    //    telemetry.addData("tics of rear:", drivetrain.mLB.getPosition());
 
     }//end of loop
 
