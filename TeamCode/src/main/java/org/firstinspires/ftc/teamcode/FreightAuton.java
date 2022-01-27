@@ -88,7 +88,7 @@ public class FreightAuton extends LinearOpMode {
     }//end of runOpMode
 
 
-    //TODO: write code that makes it go forward and stuff down here
+    //TODO: write code that makes it go forward and stuff down here... right?
 
 
 }//end of linear op mode
