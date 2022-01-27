@@ -49,9 +49,9 @@ public class FreightAuton extends LinearOpMode {
         mLB = new DcMotorX(hardwareMap.dcMotor.get("mLB"));
 
         // Get the odometry wheels
-        wheelR = new DcMotorX(hardwareMap.dcMotor.get("mRB"), ticksPerRev, circumference);
+        wheelR = new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, circumference);
         wheelL = new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, circumference);
-        wheelB = new DcMotorX(hardwareMap.dcMotor.get("mRF"), ticksPerRev, circumference);
+        wheelB = new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, circumference);
 
         // Create an odometry instance for the drivetrain
         Odometry positionTracker = new Odometry(wheelR, wheelL, wheelB, 50, backDistancePerRadian, width, 0, 0, 0);
@@ -61,7 +61,7 @@ public class FreightAuton extends LinearOpMode {
         drivetrain.reverse();
         drivetrain.telemetry = telemetry;
 
-        //TODO: add linear slide limits and code in here if we are using it
+        //TODO: add linear slide code in here if we are using it
 
         telemetry.addData("Done initializing", "");
         telemetry.update();
