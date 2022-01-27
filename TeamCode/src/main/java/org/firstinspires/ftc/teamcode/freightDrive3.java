@@ -85,10 +85,6 @@ public class freightDrive3 extends OpMode {
         odoB = new ServoX(hardwareMap.servo.get("odoB"));
 //            linear.setLimits(hardwareMap.touchSensor.get("linearBtmLimit"), 12.0); //UNCOMMENT WITH LIMIT SWITCH
 
-        odoL.setAngle(180);
-        odoR.setAngle(180);
-        odoB.setAngle(180);
-
     }// end of init
 
     public void start(){
@@ -96,6 +92,12 @@ public class freightDrive3 extends OpMode {
         linear.resetEncoder(); //assuming the outake arm is at the btm, set the encoder to 0
         linear.setBrake(true); //so that the outake motor arm will hold pos and won't "bounce"
         linear.controlVelocity();
+
+
+    /* ------------------------ lift the odometry pods up ----------------------- */
+        odoL.setAngle(180);
+        odoR.setAngle(180);
+        odoB.setAngle(180);
     }
 
     public void loop(){
@@ -174,15 +176,15 @@ public class freightDrive3 extends OpMode {
         //if there is no manual movement...
         } else {
             //check the dpad for automatic movement requests, and record the position requested in the linearGoToPos variable. recording the requested position like this means the driver doesn't have to keep the dpad depressed until the movement is finished, they can just press and release it.
-//            if (dpadUpHit2) {
-//                linearGoToPos = linearUpPos;
-//            } else if (dpadDownHit2) {
-//                linearGoToPos = linearDownPos;
-//            } else if (dpadLeftHit2) {
-//                linearGoToPos = linearMidPos;
-//            } else if (dpadRightHit2) {
-//                linearGoToPos = linearStagedPos;
-//            }
+           if (dpadUpHit2) {
+               linearGoToPos = linearUpPos;
+           } else if (dpadDownHit2) {
+               linearGoToPos = linearDownPos;
+           } else if (dpadLeftHit2) {
+               linearGoToPos = linearMidPos;
+           } else if (dpadRightHit2) {
+               linearGoToPos = linearStagedPos;
+           }
 
             //if there is automatic movement requested (can be from current iteration OR from past iteration) go to the position
             if (linearGoToPos != -1) {
@@ -215,15 +217,15 @@ public class freightDrive3 extends OpMode {
 
     /* ------------------------- odometry pods up and down test ------------------------ */
 
-        if (dpadUpHit2) { //up
-            odoL.setAngle(180);
-            odoR.setAngle(180);
-            odoB.setAngle(180);
-        } else if (dpadDownHit2) { //down
-            odoL.setAngle(0);
-            odoR.setAngle(0);
-            odoB.setAngle(0);
-        }
+        // if (dpadUpHit2) { //up
+        //     odoL.setAngle(180);
+        //     odoR.setAngle(180);
+        //     odoB.setAngle(180);
+        // } else if (dpadDownHit2) { //down
+        //     odoL.setAngle(0);
+        //     odoR.setAngle(0);
+        //     odoB.setAngle(0);
+        // }
 
     /* -------------- set the intake spinner direction / on / off -------------- */
         intakeSpinDir = (bumperRightHit1 || bumperRightHit2)? intakeSpinDir *= -1: intakeSpinDir;//toggles intake direction
@@ -287,15 +289,15 @@ public class freightDrive3 extends OpMode {
 
     /* ---------- used to slow a motor down when approching target pos ---------- */
     /* ------------- returns (distance left to travel)^(1/adjuster) ------------- */
-            private double fakePid(DcMotorX motor, double targetPos, double speed, double adjuster, double stopTolerance){
-                double currentPos = motor.getPosition();
-                double distanceToMove = Math.abs(targetPos - currentPos);
-                if (distanceToMove > stopTolerance){
-                    return Math.pow(distanceToMove,speed/adjuster)*(currentPos < targetPos? 1:-1);
-                } else {
-                    return 0.0;
-                }
-            }
+    private double fakePid(DcMotorX motor, double targetPos, double speed, double adjuster, double stopTolerance){
+        double currentPos = motor.getPosition();
+        double distanceToMove = Math.abs(targetPos - currentPos);
+        if (distanceToMove > stopTolerance){
+            return Math.pow(distanceToMove,speed/adjuster)*(currentPos < targetPos? 1:-1);
+        } else {
+            return 0.0;
+        }
+    }
 
 
 }
