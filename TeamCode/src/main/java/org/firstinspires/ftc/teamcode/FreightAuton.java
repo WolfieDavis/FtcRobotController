@@ -10,6 +10,8 @@ import org.firstinspires.ftc.teamcode.api.LimitedMotorX;
 import org.firstinspires.ftc.teamcode.api.Odometry;
 import org.firstinspires.ftc.teamcode.api.ServoX;
 
+import java.util.Arrays;
+
 @Autonomous
 public class FreightAuton extends LinearOpMode {
 
@@ -68,8 +70,8 @@ public class FreightAuton extends LinearOpMode {
 
       waitForStart();
 
-        Thread drivetrainThread = new Thread(drivetrain); // Run it in a separate thread
-        drivetrainThread.start(); // Start the thread
+        // Thread drivetrainThread = new Thread(drivetrain); // Run it in a separate thread
+        // drivetrainThread.start(); // Start the thread
 
         //drop odometry pods
         odoL.setAngle(0);
@@ -78,12 +80,12 @@ public class FreightAuton extends LinearOpMode {
 
 
         //TODO: call code that makes it go forward and stuff up here
-        double[] position1 = [1, 1, 0] //x, y, phi. this can be declared at the top of the program
+        double[] position1 = {1, 1, 0}; //x, y, phi. this can be declared at the top of the program
         //for each movement copy this while loop, change position1
-        while(!isStopRequested()){
-            double[] drivePower = fakePid_DrivingEdition(position1, positionTracker, [1, 1], [30, 30], [1, 1]);
+        do{
+            double[] drivePower = fakePid_DrivingEdition(position1, positionTracker, {1, 1}, {30, 30}, {1, 1});
             drivetrain.driveWithGamepad(1, drivePower[0],drivePower[1], drivePower[2]);
-        }
+        }while (!isStopRequested() && !Arrays.equals(drivePower,{0, 0, 0}))
 
 
         //code at the end of auto that shuts everything down
