@@ -89,8 +89,8 @@ public class FreightAuton extends LinearOpMode {
         //code at the end of auto that shuts everything down
         drivetrain.setBrake(true);
         drivetrain.stop();
-        drivetrain.setActive(false);
-        drivetrain.stopController();
+        // drivetrain.setActive(false);
+        // drivetrain.stopController();
     }//end of runOpMode
 
 
@@ -113,8 +113,9 @@ public class FreightAuton extends LinearOpMode {
             returnPowers[0] = powerFractions[0] * fakePidAdjustment;
             returnPowers[1] = powerFractions[1] * fakePidAdjustment;
         } 
-        if (Math.abs(distanceToMove[2]) > stopTolerance[1]) {
-            returnPowers[2] = Math.pow(distanceToMove[2],speed[1]/adjuster[1])*(distanceToMove[2] >= 0? 1:-1);
+        double totalTurnDistance = Math.abs(distanceToMove[2]);
+        if (totalTurnDistance > stopTolerance[1]) {
+            returnPowers[2] = Math.pow(totalTurnDistance,speed[1]/adjuster[1])*(distanceToMove[2] >= 0? 1:-1);
         }
 
         return returnPowers;
