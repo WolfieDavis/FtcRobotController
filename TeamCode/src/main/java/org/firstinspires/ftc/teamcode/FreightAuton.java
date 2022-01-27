@@ -49,8 +49,8 @@ public class FreightAuton extends LinearOpMode {
         mLB = new DcMotorX(hardwareMap.dcMotor.get("mLB"));
 
         // Get the odometry wheels
-        wheelR = new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, circumference);
-        wheelL = new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, circumference);
+        wheelR = new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, (-circumference));
+        wheelL = new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, (-circumference));
         wheelB = new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, circumference);
 
         // Create an odometry instance for the drivetrain

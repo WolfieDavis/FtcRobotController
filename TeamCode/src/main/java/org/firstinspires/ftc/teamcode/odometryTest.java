@@ -40,6 +40,7 @@ public class odometryTest extends OpMode {
     // Odometry parameters
     private int ticksPerRev = 8192;
     private double circumference = 15.71;
+    
 
 
     public void init() {
@@ -62,11 +63,11 @@ public class odometryTest extends OpMode {
         //odometry initialization code
         Odometry positionTracker = new Odometry(
 //                wheelR, wheelL, wheelB,
-                new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, circumference),
-                new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, circumference),
-                new DcMotorX(hardwareMap.dcMotor.get("mLB"), 0, circumference),
+                new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, (-circumference)),
+                new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, (-circumference)),
+                new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, circumference),
                 50,
-                0 / (2 * Math.PI), // old: -41.577 / (2 * Math.PI)  //6.15 cm from the middle for old   //19.2 cm from the middle for new
+                1.43 / (2*Math.PI), //-2.25 / (2 * Math.PI), //2.25 2.3 // old: -41.577 / (2 * Math.PI)  //6.15 cm from the middle for old   //19.2 cm from the middle for new
                 26.9, //cm between side odometry wheels
                 0, //set to 0 as in auto from last year - in documentation they were set to 5
                 0,
@@ -128,8 +129,7 @@ public class odometryTest extends OpMode {
         /* ------------------------- control the drivetrain ------------------------- */
         // Drive the robot with joysticks if they are moved (with rates)
         if (Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
-            double multiplier = -1;
-            drivetrain.driveWithGamepad(0.2, rateCurve(-rightY, 1.7), rateCurve(leftX, 1.7) * multiplier/* 0.5*leftX */, rateCurve(rightX, 1.7)); //curved stick rates
+            drivetrain.driveWithGamepad(1, rateCurve(-rightY, 1.7) * 0.3, rateCurve(-leftX, 1.7) * 0.35, rateCurve(rightX, 1.7) * 0.3); //curved stick rates
         } else {
             // If the joysticks are not pressed, do not move the bot
             drivetrain.stop();
@@ -151,7 +151,8 @@ public class odometryTest extends OpMode {
         /* ------- print to telemetry (used for calibration/ trouble shooting) ------ */
         telemetry.addData("x", drivetrain.positionTracker.x); // Get the robot's current x coordinate
         telemetry.addData("y", drivetrain.positionTracker.y); // Get the robot's current y coordinate
-        telemetry.addData("heading", drivetrain.positionTracker.phi); // Get the robot's current heading
+        telemetry.addData("heading", (drivetrain.positionTracker.phi)); // Get the robot's current heading
+        telemetry.addData("degrees", (drivetrain.positionTracker.phi*180/Math.PI));
     //    telemetry.addData("tics of rear:", drivetrain.mLB.getPosition());
 
     }//end of loop
