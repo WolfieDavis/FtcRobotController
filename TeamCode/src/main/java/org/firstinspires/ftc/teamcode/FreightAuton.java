@@ -101,7 +101,7 @@ public class FreightAuton extends LinearOpMode {
         double[] distanceToMove = {targetPos[0] - odo.x, targetPos[1] - odo.y, targetPos[2] - odo.phi};
         double totalDistance = Math.sqrt(Math.pow(distanceToMove[0], 2) + Math.pow(distanceToMove[1], 2));
 
-        double returnPowers = {0, 0, 0};
+        double[] returnPowers = {0, 0, 0};
         if (totalDistance > stopTolerance[0]){
             double[] powerFractions = {distanceToMove[0]/totalDistance, distanceToMove[1]/totalDistance};
             if (powerFractions[0] > powerFractions[1]) {
