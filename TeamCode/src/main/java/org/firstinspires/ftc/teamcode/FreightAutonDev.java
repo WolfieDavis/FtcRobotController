@@ -104,7 +104,7 @@ public class FreightAutonDev extends LinearOpMode {
         //for each movement copy this while loop, change position1
         do {
             drivePower = fakePid_DrivingEdition(position1, positionTracker, speed, adjuster, stopTolerance);
-            drivetrain.driveWithGamepad(0.2, -drivePower[1], drivePower[2], drivePower[0]);
+            drivetrain.driveWithGamepad(0.2, drivePower[1], drivePower[2], drivePower[0]);
 
         } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
 
@@ -113,7 +113,7 @@ public class FreightAutonDev extends LinearOpMode {
         //strafe
         do {
             drivePower = fakePid_DrivingEdition(position2, positionTracker, speed, adjuster, stopTolerance);
-            drivetrain.driveWithGamepad(0.5, -drivePower[1], drivePower[2], -drivePower[0]);
+            drivetrain.driveWithGamepad(0.5, drivePower[1], drivePower[2], drivePower[0]);
 
         } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
 
@@ -143,19 +143,18 @@ public class FreightAutonDev extends LinearOpMode {
         double totalDistance = Math.sqrt(Math.pow(distanceToMove[0], 2) + Math.pow(distanceToMove[1], 2));
 
         double[] returnPowers = {0, 0, 0};
-        if (totalDistance > stopTolerance[0]) {
-            double[] powerFractions = {distanceToMove[0] / totalDistance, distanceToMove[1] / totalDistance};
+        if (totalDistance > stopTolerance[0]){
+            double[] powerFractions = {distanceToMove[0]/totalDistance, distanceToMove[1]/totalDistance};
+            double scaleToOne;
             if (powerFractions[0] > powerFractions[1]) {
-                powerFractions[1] = powerFractions[1] / powerFractions[0];
-                powerFractions[0] = 1;
+                scaleToOne = Math.abs(powerFractions[0])
             } else {
-                powerFractions[0] = powerFractions[0] / powerFractions[1];
-                powerFractions[1] = 1;
+                scaleToOne = Math.abs(powerFractions[1])
             }
-            double fakePidAdjustment = Math.pow(totalDistance, speed[0] / adjuster[0]);
-            returnPowers[0] = powerFractions[0] * fakePidAdjustment;
-            returnPowers[1] = powerFractions[1] * fakePidAdjustment;
-        }
+            double fakePidAdjustment = Math.pow(totalDistance,speed[0]/adjuster[0]);
+            returnPowers[0] = powerFractions[0]/scaleToOne * fakePidAdjustment;
+            returnPowers[1] = powerFractions[1]/scaleToOne * fakePidAdjustment;
+        } 
         double totalTurnDistance = Math.abs(distanceToMove[2]);
         if (totalTurnDistance > stopTolerance[1]) {
             returnPowers[2] = Math.pow(totalTurnDistance, speed[1] / adjuster[1]) * (distanceToMove[2] >= 0 ? 1 : -1);
