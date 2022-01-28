@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.api.ServoX;
 import java.util.Arrays;
 
 @Autonomous
-public class FreightAuton extends LinearOpMode {
+public class FreightAutonDev extends LinearOpMode {
 
     // Odometry parameters
     private int ticksPerRev = 8192; //left same as last year
@@ -95,11 +95,10 @@ public class FreightAuton extends LinearOpMode {
         double[] drivePower;
 
         //positions
-       // double[] position1 = {0, 50, 0}; //x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
+        // double[] position1 = {0, 50, 0}; //x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
         double[] position1 = {0, 50, 0};
         double[] position2 = {50, 50, 0};
         double[] position3 = {0, 0, 0};
-
 
 
         //for each movement copy this while loop, change position1
