@@ -155,8 +155,8 @@ public class freightDrive3 extends OpMode {
 
 
 
-    /* --------- reverse the bot if d pad up on controller 1 is pressed --------- */
-        if(dpadUpHit1){
+    /* --------- reverse the bot if d pad right on controller 1 is pressed --------- */
+        if(dpadRightHit1){
             drivetrain.reverse();
             isReversed = !isReversed;
         }//reverses the bot
@@ -215,17 +215,17 @@ public class freightDrive3 extends OpMode {
             outtake.setAngle(outtakeCollectPos);
         }
 
-    /* ------------------------- odometry pods up and down test ------------------------ */
+    /* ------------------------ odometry pods up and down ----------------------- */
 
-        // if (dpadUpHit2) { //up
-        //     odoL.setAngle(180);
-        //     odoR.setAngle(180);
-        //     odoB.setAngle(180);
-        // } else if (dpadDownHit2) { //down
-        //     odoL.setAngle(0);
-        //     odoR.setAngle(0);
-        //     odoB.setAngle(0);
-        // }
+         if (dpadUpHit1) { //up
+             odoL.setAngle(180);
+             odoR.setAngle(180);
+             odoB.setAngle(180);
+         } else if (dpadDownHit1) { //down
+             odoL.setAngle(0);
+             odoR.setAngle(0);
+             odoB.setAngle(0);
+         }
 
     /* -------------- set the intake spinner direction / on / off -------------- */
         intakeSpinDir = (bumperRightHit1 || bumperRightHit2)? intakeSpinDir *= -1: intakeSpinDir;//toggles intake direction
@@ -257,7 +257,7 @@ public class freightDrive3 extends OpMode {
         // Drive the robot with joysticks if they are moved (with rates)
         if(Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
             double multiplier = (isReversed)? -1: 1;
-            drivetrain.driveWithGamepad(1, rateCurve(rightY, 1.7),rateCurve(leftX, 1.7) * multiplier/* 0.5*leftX */, rateCurve(rightX,1.7)); //curved stick rates
+            drivetrain.driveWithGamepad(0.8, rateCurve(rightY, 1.7),rateCurve(leftX, 1.7) * multiplier * 0.625, rateCurve(rightX,1.7)); //curved stick rates
         }else{
             // If the joysticks are not pressed, do not move the bot
             drivetrain.stop();

@@ -63,6 +63,9 @@ public class FreightAuton extends LinearOpMode {
         drivetrain.reverse();
         // drivetrain.telemetry = telemetry;
 
+        Thread positionTracking = new Thread(positionTracker);
+        positionTracking.start();
+
         //TODO: add linear slide code in here if we are using it
 
         telemetry.addData("Done initializing", "");
@@ -73,9 +76,9 @@ public class FreightAuton extends LinearOpMode {
         waitForStart();
 
         //drop odometry pods
-        odoL.setAngle(0);
-        odoR.setAngle(0);
-        odoB.setAngle(0); //odoB.goToAngle(0, 500); //gives them time to drop //TODO: move odometry and drivetrain init code down here to make sure it initializes when servos are down and reading
+//        odoL.setAngle(0);
+//        odoR.setAngle(0);
+//        odoB.setAngle(0); //odoB.goToAngle(0, 500); //gives them time to drop //TODO: move odometry and drivetrain init code down here to make sure it initializes when servos are down and reading
 
         //reads out where we are in the code
         telemetry.addData("started??", "");
@@ -84,27 +87,61 @@ public class FreightAuton extends LinearOpMode {
 
         /* --------------- move robot --------------- */
         //movement parameters
-        double[] speed = {.5, .5}; //first arg is for straight line movement, second is for turning
-        double[] adjuster = {30, 30}; //how "curved" the rate is, needs to be > 1
-        double[] stopTolerance = {5, 5}; //acceptable tolerance (in cm) for the robot to be in a position
+        double[] speed = {0.5, 0.5}; //first arg is for straight line movement, second is for turning
+        double[] adjuster = {20, 20}; //how "curved" the rate is, needs to be > 1
+        double[] stopTolerance = {10, 10}; //acceptable tolerance (cm) for the robot to be in a position
 
         //just needs to be here
         double[] drivePower;
 
         //positions
-        double[] position1 = {0, 20, 0}; //x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
+       // double[] position1 = {0, 50, 0}; //x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
+        double[] position1 = {0, 50, 0};
+        double[] position2 = {50, 50, 0};
+        double[] position3 = {0, 0, 0};
+
+//        do{
+//            //read out positions
+//            telemetry.addData("x current", positionTracker.x);
+//            telemetry.addData("y current", positionTracker.y);
+//            telemetry.addData("phi current (deg)", positionTracker.phi * 180 / Math.PI);
+//            telemetry.addData("x target", position1[0]);
+//            telemetry.addData("y target", position1[1]);
+//            telemetry.addData("phi target (deg)", position1[2]);
+//            telemetry.update();
+//        }while (!isStopRequested());
+
+
+
 
         //for each movement copy this while loop, change position1
         do {
             drivePower = fakePid_DrivingEdition(position1, positionTracker, speed, adjuster, stopTolerance);
-            drivetrain.driveWithGamepad(1, drivePower[0], drivePower[1], drivePower[2]);
+            drivetrain.driveWithGamepad(0.2, -drivePower[1], drivePower[2], drivePower[0]);
+
+        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
+
+        sleep(1000);
+
+        //strafe
+        do {
+            drivePower = fakePid_DrivingEdition(position2, positionTracker, speed, adjuster, stopTolerance);
+            drivetrain.driveWithGamepad(0.5, -drivePower[1], drivePower[2], -drivePower[0]);
+
+        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
+
+        sleep(1000);
+
+        do {
+            drivePower = fakePid_DrivingEdition(position3, positionTracker, speed, adjuster, stopTolerance);
+            drivetrain.driveWithGamepad(0.5, drivePower[1], drivePower[2], drivePower[0]);
 
         } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
 
 
         /* ------------------ other ------------------ */
 
-        //    spinDucks(500); //turns on carousel spinner for 500ms (or whatever you set it to)
+        //    spinDucks(0.5, 500); //turns on carousel spinner at power 0.5 for 500ms (or whatever you set them to)
 
 
         /* ---------------- shut down ---------------- */
@@ -113,7 +150,7 @@ public class FreightAuton extends LinearOpMode {
     }//end of runOpMode
 
 
-    /* -------- backend of drive code: fake pid -------- */
+    /* ----------- backend of drive code: fake pid ----------- */
     private double[] fakePid_DrivingEdition(double[] targetPos, Odometry odo, double[] speed, double[] adjuster, double[] stopTolerance) {
         double[] distanceToMove = {targetPos[0] - odo.x, targetPos[1] - odo.y, targetPos[2] - odo.phi};
         double totalDistance = Math.sqrt(Math.pow(distanceToMove[0], 2) + Math.pow(distanceToMove[1], 2));
@@ -137,7 +174,7 @@ public class FreightAuton extends LinearOpMode {
             returnPowers[2] = Math.pow(totalTurnDistance, speed[1] / adjuster[1]) * (distanceToMove[2] >= 0 ? 1 : -1);
         }
 
-        //read out positions
+//        //read out positions
         telemetry.addData("x current", odo.x);
         telemetry.addData("y current", odo.y);
         telemetry.addData("phi current (deg)", odo.phi * 180 / Math.PI);
@@ -149,18 +186,13 @@ public class FreightAuton extends LinearOpMode {
         return returnPowers;
     }
 
-    private void spinDucks(int waitTime) {
-        //spin duck wheel/ intake for testing for now
-        intake.setPower(1);
+    /* ----------------- spins the carousel ----------------- */
+    private void spinDucks(double power, int waitTime) {
+        //will spin duck wheel- intake for testing for now
+        intake.setPower(power);
         sleep(waitTime);
         intake.setPower(0);
     }
 
 
-
 }//end of linear op mode
-
-
-
-
-
