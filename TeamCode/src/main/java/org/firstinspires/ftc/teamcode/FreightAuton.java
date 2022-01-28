@@ -19,7 +19,7 @@ public class FreightAuton extends LinearOpMode {
     private int ticksPerRev = 8192; //left same as last year
     private double circumference = 15.71; //left same as last year
     private double width = 26.9; //distance between centers of odometry wheels
-    private double backDistancePerRadian = 0 / (2 * Math.PI); //TODO: test to see what this is - rotate bot 360 - take the x value and put it over 2pi - it compensates fo the wheel being in the back of the bot
+    private double backDistancePerRadian = 1.43 / (2 * Math.PI); //TODO: test to see what this is - rotate bot 360 - take the x value and put it over 2pi - it compensates fo the wheel being in the back of the bot
 
 //    private final double TILE_SIZE = 60.96; //NO we're not measuring in fractional tiles this year, SAE is enough as it is
 
@@ -60,7 +60,7 @@ public class FreightAuton extends LinearOpMode {
 
         // sets up drivetrain
         drivetrain = new Drivetrain(mRF, mLF, mRB, mLB);
-        drivetrain.reverse(); //TODO: I don't think u really want this, it's because we started the bot backwards last year
+        drivetrain.reverse();
         // drivetrain.telemetry = telemetry;
 
         //TODO: add linear slide code in here if we are using it
@@ -70,14 +70,11 @@ public class FreightAuton extends LinearOpMode {
 
       waitForStart();
 
-        // Thread drivetrainThread = new Thread(drivetrain); // Run it in a separate thread // - we're not doing multithreading anymore
-        // drivetrainThread.start(); // Start the thread
-
         //drop odometry pods
         odoL.setAngle(0);
         odoR.setAngle(0);
         odoB.setAngle(0);
-
+        //odoB.goToAngle(0, 500); //gives them time to drop //TODO: move odometry and drivetrain init code down here to make sure it initializes when servos are down and reading
 
         //TODO: call code that makes it go forward and stuff up here
 
@@ -103,8 +100,6 @@ public class FreightAuton extends LinearOpMode {
         //code at the end of auto that shuts everything down
         drivetrain.setBrake(true);
         drivetrain.stop();
-        // drivetrain.setActive(false);
-        // drivetrain.stopController();
     }//end of runOpMode
 
 
@@ -131,6 +126,18 @@ public class FreightAuton extends LinearOpMode {
         if (totalTurnDistance > stopTolerance[1]) {
             returnPowers[2] = Math.pow(totalTurnDistance,speed[1]/adjuster[1])*(distanceToMove[2] >= 0? 1:-1);
         }
+
+        //read out positions
+        telemetry.addData("x current", odo.x);
+        telemetry.addData("y current", odo.y);
+        telemetry.addData("phi current (deg)", odo.phi*180/Math.PI);
+
+        telemetry.addData("x target", targetPos[0]);
+        telemetry.addData("y target", targetPos[1]);
+        telemetry.addData("phi target (deg)", targetPos[2]);
+
+        telemetry.update();
+
 
         return returnPowers;
     }
