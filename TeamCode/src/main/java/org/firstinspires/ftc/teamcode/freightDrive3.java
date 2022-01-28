@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.api.State;
  * Robohawks ftc team 5741
  * Drive code for driver controlled period
  * contributers: Wolfie Davis, Crawford Phillips, Will Sprigg
- * ruined by: Cailean Sorce, and Wolfie Davis too
+ * ruined by: Cailean Sorce
  */
 
 @TeleOp

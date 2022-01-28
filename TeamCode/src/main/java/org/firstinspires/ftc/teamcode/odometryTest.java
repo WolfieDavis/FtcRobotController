@@ -16,17 +16,13 @@ import org.firstinspires.ftc.teamcode.api.Odometry;
  * Robohawks ftc team 5741
  * Drive code for driver controlled period
  * contributers: Wolfie Davis, Crawford Phillips, Will Sprigg
- * ruined by: Cailean Sorce, and Wolfie Davis too
+ * ruined by: Cailean Sorce
  */
 
 @TeleOp
 public class odometryTest extends OpMode {
 
     private ControlledDrivetrain drivetrain;
-    //    private DcMotorX
-//            wheelR,
-//            wheelL,
-//            wheelB;
     private ServoX
             odoL,
             odoR,
@@ -55,14 +51,8 @@ public class odometryTest extends OpMode {
         odoR = new ServoX(hardwareMap.servo.get("odoR"));
         odoB = new ServoX(hardwareMap.servo.get("odoB"));
 
-        //raise the pods up at the start of driver controlled to make sure they're up
-//        odoL.setAngle(180);
-//        odoR.setAngle(180);
-//        odoB.setAngle(180);
-
         //odometry initialization code
         Odometry positionTracker = new Odometry(
-//                wheelR, wheelL, wheelB,
                 new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, (-circumference)),
                 new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, (-circumference)),
                 new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, circumference),

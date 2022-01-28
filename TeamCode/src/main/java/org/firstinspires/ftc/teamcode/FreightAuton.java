@@ -70,7 +70,7 @@ public class FreightAuton extends LinearOpMode {
 
       waitForStart();
 
-        // Thread drivetrainThread = new Thread(drivetrain); // Run it in a separate thread
+        // Thread drivetrainThread = new Thread(drivetrain); // Run it in a separate thread // - we're not doing multithreading anymore
         // drivetrainThread.start(); // Start the thread
 
         //drop odometry pods
@@ -80,12 +80,24 @@ public class FreightAuton extends LinearOpMode {
 
 
         //TODO: call code that makes it go forward and stuff up here
+
+        //movement parameters
+        double[] speed = {1, 1}; //first arg is for straight line movement, second is for turning
+        double[] adjuster = {30, 30}; //how "curved" the rate is, needs to be > 1
+        double[] stopTolerance = {1, 1}; //acceptable tolerance (in cm) for the robot to be in a position
+
+        //just needs to be here
+        double[] drivePower;
+
+        //positions
         double[] position1 = {1, 1, 0}; //x, y, phi. this can be declared at the top of the program
+
         //for each movement copy this while loop, change position1
         do{
-            double[] drivePower = fakePid_DrivingEdition(position1, positionTracker, {1, 1}, {30, 30}, {1, 1});
+            drivePower = fakePid_DrivingEdition(position1, positionTracker, speed, adjuster, stopTolerance);
             drivetrain.driveWithGamepad(1, drivePower[0],drivePower[1], drivePower[2]);
-        }while (!isStopRequested() && !Arrays.equals(drivePower,{0, 0, 0}))
+
+        }while (!isStopRequested() && !Arrays.equals(drivePower, new double[] {0, 0, 0}));
 
 
         //code at the end of auto that shuts everything down
@@ -111,7 +123,7 @@ public class FreightAuton extends LinearOpMode {
                 powerFractions[0] = powerFractions[0]/powerFractions[1];
                 powerFractions[1] = 1;
             }
-            double fakePidAdjustment = Math.pow(totalDistance,speed[0]/adjuster[0]);
+            double fakePidAdjustment = Math.pow(totalDistance, speed[0]/adjuster[0]);
             returnPowers[0] = powerFractions[0] * fakePidAdjustment;
             returnPowers[1] = powerFractions[1] * fakePidAdjustment;
         } 
