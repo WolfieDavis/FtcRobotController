@@ -74,7 +74,7 @@ public class freightDrive3 extends OpMode {
                 mLB = new DcMotorX(hardwareMap.dcMotor.get("mLB"));
 
         drivetrain = new Drivetrain(mRF, mLF, mRB, mLB);
-
+        drivetrain.reverse();
 
         linear = new LimitedMotorX(hardwareMap.dcMotor.get("linear"), 1968, 16.25);// 2900, 16.25 motor for linear rail
         intake = new DcMotorX(hardwareMap.dcMotor.get("intake"));//motor for intake spinner
@@ -84,6 +84,7 @@ public class freightDrive3 extends OpMode {
         odoR = new ServoX(hardwareMap.servo.get("odoR"));
         odoB = new ServoX(hardwareMap.servo.get("odoB"));
 //            linear.setLimits(hardwareMap.touchSensor.get("linearBtmLimit"), 12.0); //UNCOMMENT WITH LIMIT SWITCH
+
 
     }// end of init
 
@@ -99,6 +100,7 @@ public class freightDrive3 extends OpMode {
         odoR.setAngle(180);
         odoB.setAngle(180);
     }
+
 
     public void loop(){
 
@@ -156,10 +158,11 @@ public class freightDrive3 extends OpMode {
 
 
     /* --------- reverse the bot if d pad right on controller 1 is pressed --------- */
-        if(dpadRightHit1){
-            drivetrain.reverse();
-            isReversed = !isReversed;
-        }//reverses the bot
+//        if(dpadRightHit1){
+//
+//            drivetrain.reverse();
+//            isReversed = !isReversed;
+//        }//reverses the bot
 
 
     /* ------------- move the outake linear slide ( called "linear") ------------ */
@@ -234,7 +237,7 @@ public class freightDrive3 extends OpMode {
             intakeToggle *= -1;
             switch (intakeToggle){
                 case -1 :
-                    intake.setPower(0.8 * intakeSpinDir);
+                    intake.setPower(1 * intakeSpinDir);
                     break;
                 case 1 :
                     intake.setPower(0.0);
@@ -257,7 +260,7 @@ public class freightDrive3 extends OpMode {
         // Drive the robot with joysticks if they are moved (with rates)
         if(Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
             double multiplier = (isReversed)? -1: 1;
-            drivetrain.driveWithGamepad(0.8, rateCurve(rightY, 1.7),rateCurve(leftX, 1.7) * multiplier * 0.625, rateCurve(rightX,1.7)); //curved stick rates
+            drivetrain.driveWithGamepad(0.8, rateCurve(-rightY, 1.7),rateCurve(-leftX, 1.7) * multiplier * 0.625, rateCurve(rightX,1.7)); //curved stick rates
         }else{
             // If the joysticks are not pressed, do not move the bot
             drivetrain.stop();
