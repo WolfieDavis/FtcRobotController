@@ -82,8 +82,8 @@ public class odometryTest extends OpMode {
 
         //joystick values for driving.
         double leftX = gamepad1.left_stick_x;
-        double rightX = -gamepad1.right_stick_x;
-        double rightY = -gamepad1.right_stick_y; // Reads negative from the controller
+        double rightX = gamepad1.right_stick_x;
+        double rightY = gamepad1.right_stick_y; // Reads negative from the controller
 
         //button definitions for gamepad1
         boolean a1 = gamepad1.a;
@@ -119,7 +119,7 @@ public class odometryTest extends OpMode {
         /* ------------------------- control the drivetrain ------------------------- */
         // Drive the robot with joysticks if they are moved (with rates)
         if (Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
-            drivetrain.driveWithGamepad(1, rateCurve(-rightY, 1.7) * 0.3, rateCurve(-leftX, 1.7) * 0.35, rateCurve(rightX, 1.7) * 0.3); //curved stick rates
+            drivetrain.driveWithGamepad(1, rateCurve(rightY, 1.7) * 0.3, rateCurve(leftX, 1.7) * 0.35, rateCurve(rightX, 1.7) * 0.3); //curved stick rates
         } else {
             // If the joysticks are not pressed, do not move the bot
             drivetrain.stop();

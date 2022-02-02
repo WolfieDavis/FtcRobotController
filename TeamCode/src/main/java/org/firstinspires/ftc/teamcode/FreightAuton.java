@@ -103,14 +103,14 @@ public class FreightAuton extends LinearOpMode {
         double[] position1 = {0, 30, 0}; //forward
         double[] position2 = {50, 50, 0}; //strafe after forward
         double[] position3 = {0, 0, 0}; //back to 0
-        double[] position4 = {0, 0, Math.PI}; //rotate
+        double[] position4 = {30, 30, Math.PI}; //rotate
 
         //for each movement copy this while loop, change position1
 
         //forward
         do {
             drivePower = fakePid_DrivingEdition(position4, positionTracker, speed, adjuster, stopTolerance);
-            drivetrain.driveWithGamepad(0.2, -drivePower[1], drivePower[2], -drivePower[0]);
+            drivetrain.driveWithGamepad(0.2, drivePower[1], drivePower[2], drivePower[0]);
 
         } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
 

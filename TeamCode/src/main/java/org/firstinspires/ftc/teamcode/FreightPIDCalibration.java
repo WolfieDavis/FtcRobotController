@@ -33,9 +33,9 @@ public class FreightPIDCalibration extends OpMode {
     private String[] editingOptions = new String[]{"Kp", "Kd", "Ki"};
 
     // Coordinate to calibrate
-    private FreightPIDCalibration.CalibrationMode mode = FreightPIDCalibration.CalibrationMode.PHI;
+    private FreightPIDCalibration.CalibrationMode mode = CalibrationMode.Y;
     // Test setpoint
-    private double setpoint = 2*Math.PI;
+    private double setpoint = 30;// 2*Math.PI;
 
     // Controller for tuning
     private ControlledDrivetrain drivetrain;
@@ -60,7 +60,7 @@ public class FreightPIDCalibration extends OpMode {
         // Instantiate the PID-controlled drivetrain
         drivetrain = new ControlledDrivetrain(mRF, mLF, mRB, mLB, positionTracker);
         // Reverse the drivetrain (between left/right wheels are on backward)
-        //drivetrain.reverse();
+        //drivetrain.reverse(); //all but rotation
         // Adding logging to drivetrain (only needed for development)
         drivetrain.telemetry = telemetry;
         // Start with the drivetrain off
@@ -179,7 +179,7 @@ public class FreightPIDCalibration extends OpMode {
 
     private void setPosition(){
         // Create and register the setpoint
-        double[] coords = new double[]{0, 0, (2*Math.PI)};
+        double[] coords = new double[]{0, 0, 0};
         coords[getModeIndex()] = setpoint;
         drivetrain.setPosition(coords);
     }
