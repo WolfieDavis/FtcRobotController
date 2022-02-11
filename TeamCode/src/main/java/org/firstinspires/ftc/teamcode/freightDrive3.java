@@ -28,6 +28,7 @@ public class freightDrive3 extends OpMode {
     private LimitedMotorX linear;
     private ServoX
             outtake,
+            tip,
             odoL,
             odoR,
             odoB;
@@ -44,9 +45,9 @@ public class freightDrive3 extends OpMode {
             linearGoToPos = -1, // used to keep track of which position to go to
             //bucket positions and trip point
             outtakeLinearTrip = 1, //the bucket tips up to hold stuff in when linear is moved above this point
-            outtakeTravelPos = 125, //120 - the bucket is in this angle when traveling
-            outtakeCollectPos = 175, //180 - 178 is too low, 175 is too high - the bucket is in this position when collecting
-            outtakeDumpPos = 80; //100, 45 - the bucket is in this position when dumping
+            outtakeTravelPos = 137.5, //137.5      //125 //120 - the bucket is in this angle when traveling
+            outtakeCollectPos = 175, //175         //175 //180 - 178 is too low, 175 is too high - the bucket is in this position when collecting
+            outtakeDumpPos = 85; //85              //80 //100, 45 - the bucket is in this position when dumping
 //        private TouchSensor spinLimit,
 //                linearBtmLimit;
     //limit switch is named spinLimit
@@ -80,10 +81,12 @@ public class freightDrive3 extends OpMode {
         intake = new DcMotorX(hardwareMap.dcMotor.get("intake"));//motor for intake spinner
         spinner = new DcMotorX(hardwareMap.dcMotor.get("spinner"));//motor for carousel spinner
         outtake = new ServoX(hardwareMap.servo.get("outtake"));//servo for outtake dropper
+        tip = new ServoX(hardwareMap.servo.get("tip"));
         odoL = new ServoX(hardwareMap.servo.get("odoL"));
         odoR = new ServoX(hardwareMap.servo.get("odoR"));
         odoB = new ServoX(hardwareMap.servo.get("odoB"));
 //            linear.setLimits(hardwareMap.touchSensor.get("linearBtmLimit"), 12.0); //UNCOMMENT WITH LIMIT SWITCH
+        //tip.setAngle(90);
 
 
     }// end of init
@@ -206,17 +209,61 @@ public class freightDrive3 extends OpMode {
 
 
     /* ------------------------- set the bucket position ------------------------ */
-        if (y1||y2){ // if a "dump"  has been requested
-            outtake.setAngle(outtakeDumpPos);
+//        if (y1||y2){ // if a "dump"  has been requested
+//            outtake.setAngle(outtakeDumpPos);
+//
+//        //if the bucket is in the upper section of the arm (traveling or dumping position) tip it back a little to keep stuff from falling out
+//        } else if ((linear.getPosition() > outtakeLinearTrip) &&! (x2||a2)){
+//            outtake.setAngle(outtakeTravelPos);
+//
+//        //if the bucket is in the lower section of the arm tip it down to the collecting position
+//        } else {
+//            outtake.setAngle(outtakeCollectPos);
+//        }
 
-        //if the bucket is in the upper section of the arm (traveling or dumping position) tip it back a little to keep stuff from falling out
-        } else if (linear.getPosition() > outtakeLinearTrip){
-            outtake.setAngle(outtakeTravelPos);
+    /* ------------------------- set the bucket position sideways ------------------------ */
+        if (x2 && (linear.getPosition() > 11)) {
+            outtake.setAngle(160);
+            tip.setAngle(0);
+        } else if (a2 && (linear.getPosition() > 11)) {
+            outtake.setAngle(160);
+            tip.setAngle(180);
+        } else{
+            tip.setAngle(87); //90 but moved to avoid hitting the wire
+            if (y1||y2){ // if a "dump"  has been requested
+                outtake.setAngle(outtakeDumpPos);
 
-        //if the bucket is in the lower section of the arm tip it down to the collecting position
-        } else {
-            outtake.setAngle(outtakeCollectPos);
+                //if the bucket is in the upper section of the arm (traveling or dumping position) tip it back a little to keep stuff from falling out
+            } else if (linear.getPosition() > outtakeLinearTrip){
+                outtake.setAngle(outtakeTravelPos);
+
+                //if the bucket is in the lower section of the arm tip it down to the collecting position
+            } else {
+                outtake.setAngle(outtakeCollectPos);
+            }
         }
+
+        /* ------------------------- combined ------------------------ */
+//        if (y1||y2){ // if a "dump"  has been requested
+//            outtake.setAngle(outtakeDumpPos);
+//
+//        } else if (linear.getPosition() > outtakeLinearTrip){//if the bucket is in the upper section of the arm (traveling or dumping position) tip it back a little to keep stuff from falling out
+//            outtake.setAngle(outtakeTravelPos);
+//            tip.setAngle(87); //90 but moved to avoid hitting the wire
+//
+//        } else if (x2 && (linear.getPosition() > 11)) {
+//            outtake.setAngle(160);
+//            tip.setAngle(0);
+//
+//        }else if (a2 && (linear.getPosition() > 11)){
+//            outtake.setAngle(160);
+//            tip.setAngle(180);
+//
+//        } else {//if the bucket is in the lower section of the arm tip it down to the collecting position
+//            outtake.setAngle(outtakeCollectPos);
+//            tip.setAngle(90);
+//        }
+
 
     /* ------------------------ odometry pods up and down ----------------------- */
 
@@ -249,7 +296,7 @@ public class freightDrive3 extends OpMode {
     /* -------------- set the carousel spinner direction / on / off ------------- */
         spinDirection = (bumperLeftHit1 || bumperLeftHit2)? spinDirection *= -1: spinDirection; //reverse the direction if left bumper  is pressed
         //carousel spinner triggered w/ a press
-        if(a1 || a2){
+        if(a1){
             spinner.setPower(0.8 * spinDirection);
         } else {
             spinner.setPower(0);
