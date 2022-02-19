@@ -37,16 +37,16 @@ public class freightDrive3 extends OpMode {
             power = 1, //don't know
             //various positions the outake arm can be in, in inches from the bottom
             minLinearPos = 0.375, //the btm position of the outake (how far down it will go)
-            maxLinearPos = 13.875,//15.875 - the top position of the outake (how far up it will go)
+            maxLinearPos = 13.6875,//15.875 - the top position of the outake (how far up it will go)
             linearDownPos = 0, //the pick stuff up position
-            linearUpPos = 13.875, //the dump high position
+            linearUpPos = maxLinearPos-minLinearPos, //the dump high position
             linearStagedPos = 2, //the ready to pick up position (but still have clearance)
             linearMidPos = 9, //the dump low position
             linearGoToPos = -1, // used to keep track of which position to go to
             //bucket positions and trip point
             outtakeLinearTrip = 1, //the bucket tips up to hold stuff in when linear is moved above this point
             outtakeTravelPos = 137.5, //137.5      //125 //120 - the bucket is in this angle when traveling
-            outtakeCollectPos = 175, //175         //175 //180 - 178 is too low, 175 is too high - the bucket is in this position when collecting
+            outtakeCollectPos = 180, //175         //175 //180 - 178 is too low, 175 is too high - the bucket is in this position when collecting
             outtakeDumpPos = 85; //85              //80 //100, 45 - the bucket is in this position when dumping
 //        private TouchSensor spinLimit,
 //                linearBtmLimit;
@@ -77,7 +77,7 @@ public class freightDrive3 extends OpMode {
         drivetrain = new Drivetrain(mRF, mLF, mRB, mLB);
         drivetrain.reverse();
 
-        linear = new LimitedMotorX(hardwareMap.dcMotor.get("linear"), 1968, 16.25);// 2900, 16.25 motor for linear rail
+        linear = new LimitedMotorX(hardwareMap.dcMotor.get("linear"), 1607, 13.6875); //1968, 16.25 bigger pulley   // 2900, 16.25 motor for linear rail
         intake = new DcMotorX(hardwareMap.dcMotor.get("intake"));//motor for intake spinner
         spinner = new DcMotorX(hardwareMap.dcMotor.get("spinner"));//motor for carousel spinner
         outtake = new ServoX(hardwareMap.servo.get("outtake"));//servo for outtake dropper
@@ -100,8 +100,8 @@ public class freightDrive3 extends OpMode {
 
     /* ------------------------ lift the odometry pods up ----------------------- */
         odoL.setAngle(180);
-        odoR.setAngle(180);
-        odoB.setAngle(180);
+        odoR.setAngle(178);
+        odoB.setAngle(155);
     }
 
 
@@ -197,7 +197,7 @@ public class freightDrive3 extends OpMode {
                 //linear.controlPosition();
                 //TODO: THIS MIGHT NEED TO HAVE A 2nd ARG of 0.7 or 1 (the speed)
                 // linear.setPosition(linearGoToPos, 0.7); //does this work now if I add a comment
-                linear.setVelocity(fakePid(linear, linearGoToPos, 0.8, 50, 0.5)); //change the 3rd arg to adjust slow down speed, should be >1
+                linear.setVelocity(fakePid(linear, linearGoToPos, 0.8, 50, 0.625)); //change the 3rd arg to adjust slow down speed, should be >1
 
             //finally if no manual control was requested AND there is no automatic control, set the velocity to 0
             } else {
@@ -222,15 +222,15 @@ public class freightDrive3 extends OpMode {
 //        }
 
     /* ------------------------- set the bucket position sideways ------------------------ */
-        if (x2 && (linear.getPosition() > 11)) {
+        if (x2 && (linear.getPosition() > 13.25)) {
             outtake.setAngle(160);
-            tip.setAngle(0);
-        } else if (a2 && (linear.getPosition() > 11)) {
+            tip.setAngle(10);
+        } else if (a2 && (linear.getPosition() > 13.25)) {
             outtake.setAngle(160);
             tip.setAngle(180);
         } else{
             tip.setAngle(87); //90 but moved to avoid hitting the wire
-            if (y1||y2){ // if a "dump"  has been requested
+            if ((y1||y2) && (linear.getPosition() > 9)){ // if a "dump"  has been requested
                 outtake.setAngle(outtakeDumpPos);
 
                 //if the bucket is in the upper section of the arm (traveling or dumping position) tip it back a little to keep stuff from falling out
@@ -269,8 +269,8 @@ public class freightDrive3 extends OpMode {
 
          if (dpadUpHit1) { //up
              odoL.setAngle(180);
-             odoR.setAngle(180);
-             odoB.setAngle(180);
+             odoR.setAngle(178);
+             odoB.setAngle(155);
          } else if (dpadDownHit1) { //down
              odoL.setAngle(0);
              odoR.setAngle(0);

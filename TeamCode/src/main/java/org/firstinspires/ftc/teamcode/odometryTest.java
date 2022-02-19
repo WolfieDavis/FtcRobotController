@@ -53,18 +53,18 @@ public class odometryTest extends OpMode {
 
         //odometry initialization code
         Odometry positionTracker = new Odometry(
-                new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, (-circumference)),
-                new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, (-circumference)),
-                new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, circumference),
+                new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, (-circumference)), //right pod
+                new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, (-circumference)), //left pod
+                new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, (-circumference)), //back pod
                 50,
-                -170.556/ (2*Math.PI), //-169.076 //-6.41, //-120.63  //-2.25 / (2 * Math.PI), //2.25 2.3 // old: -41.577 / (2 * Math.PI)  //6.15 cm from the middle for old   //19.2 cm from the middle for new
+                184/(2*Math.PI), //170.556/ (2*Math.PI), //-169.076 //-6.41, //-120.63  //-2.25 / (2 * Math.PI), //2.25 2.3 // old: -41.577 / (2 * Math.PI)  //6.15 cm from the middle for old   //19.2 cm from the middle for new
                 26.9, //cm between side odometry wheels
                 0, //set to 0 as in auto from last year - in documentation they were set to 5
                 0,
                 0
         );
         drivetrain = new ControlledDrivetrain(mRF, mLF, mRB, mLB, positionTracker);
-        drivetrain.reverse();
+        //drivetrain.reverse();
         drivetrain.telemetry = telemetry;        // Adding logging to drivetrain (only needed for development)
         drivetrain.setActive(false);        // Start with the drivetrain off
         Thread positionTracking = new Thread(drivetrain);
@@ -83,7 +83,7 @@ public class odometryTest extends OpMode {
         //joystick values for driving.
         double leftX = gamepad1.left_stick_x;
         double rightX = gamepad1.right_stick_x;
-        double rightY = gamepad1.right_stick_y; // Reads negative from the controller
+        double rightY = -gamepad1.right_stick_y; // Reads negative from the controller
 
         //button definitions for gamepad1
         boolean a1 = gamepad1.a;
@@ -108,8 +108,8 @@ public class odometryTest extends OpMode {
 
         if (dpadUpHit1) { //up
             odoL.setAngle(180);
-            odoR.setAngle(180);
-            odoB.setAngle(180);
+            odoR.setAngle(178);
+            odoB.setAngle(155);
         } else if (dpadDownHit1) { //down
             odoL.setAngle(0);
             odoR.setAngle(0);
