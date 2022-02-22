@@ -16,10 +16,10 @@ import java.util.Arrays;
 public class FreightAuton extends LinearOpMode {
 
     // Odometry parameters
-    private int ticksPerRev = 8192; //left same as last year
-    private double circumference = 15.71; //left same as last year
-    private double width = 26.9; //distance between centers of odometry wheels
-    private double backDistancePerRadian = 170.556/ (2*Math.PI); //TODO: test to see what this is - rotate bot 360 - take the x value and put it over 2pi - it compensates fo the wheel being in the back of the bot
+    private int ticksPerRev = 8225; //left same as last year
+    private double circumference = 15.725; //left same as last year
+    private double width = 26.7385; //distance between centers of odometry wheels
+    private double backDistancePerRadian = 22.222; //TODO: test to see what this is - rotate bot 360 - take the x value and put it over 2pi - it compensates fo the wheel being in the back of the bot
 
 //    private final double TILE_SIZE = 60.96; //NO we're not measuring in fractional tiles this year, SAE is enough as it is
 
@@ -31,6 +31,7 @@ public class FreightAuton extends LinearOpMode {
             mRB,
             mLB,
             spinner,
+            carousel,
             intake,
             wheelR,
             wheelL,
@@ -51,21 +52,27 @@ public class FreightAuton extends LinearOpMode {
         mLB = new DcMotorX(hardwareMap.dcMotor.get("mLB"));
 
         intake = new DcMotorX(hardwareMap.dcMotor.get("intake"));
+        carousel = new DcMotorX(hardwareMap.dcMotor.get("carousel"));
         linear = new LimitedMotorX(hardwareMap.dcMotor.get("linear"));
         outtake = new ServoX(hardwareMap.servo.get("outtake"));
 
         // Get the odometry wheels
-        wheelR = new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, (-circumference));
+        wheelR = new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, (circumference));
         wheelL = new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, (-circumference));
-        wheelB = new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, circumference);
+        wheelB = new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, -(circumference));
 
         // Create an odometry instance for the drivetrain
         Odometry positionTracker = new Odometry(wheelR, wheelL, wheelB, 50, backDistancePerRadian, width, 0, 0, 0);
 
         // sets up drivetrain
         drivetrain = new Drivetrain(mRF, mLF, mRB, mLB);
-        drivetrain.reverse();
+        //drivetrain.reverse();
         // drivetrain.telemetry = telemetry;
+
+        double[] initialPos = {0, 0, 0}; //x, y, phi
+        positionTracker.x = initialPos[0];
+        positionTracker.y = initialPos[1];
+        positionTracker.phi = initialPos[2];
 
         Thread positionTracking = new Thread(positionTracker);
         positionTracking.start();
@@ -91,7 +98,7 @@ public class FreightAuton extends LinearOpMode {
 
         /* --------------- move robot --------------- */
         //movement parameters
-        double[] speed = {0.5, 0.5}; //first arg is for straight line movement, second is for turning
+        double[] speed = {0.2, 0.2}; //first arg is for straight line movement, second is for turning
         double[] adjuster = {20, 20}; //how "curved" the rate is, needs to be > 1
         double[] stopTolerance = {5, Math.PI/36}; //acceptable tolerance (cm) for the robot to be in a position
 
@@ -100,7 +107,7 @@ public class FreightAuton extends LinearOpMode {
 
         //positions
         // double[] position1 = {0, 50, 0}; //x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
-        double[] position1 = {0, 30, 0}; //forward
+        double[] carousel = {0, 30, 0}; //forward
         double[] position2 = {50, 50, 0}; //strafe after forward
         double[] position3 = {0, 0, 0}; //back to 0
         double[] position4 = {30, 30, Math.PI}; //rotate
@@ -109,7 +116,7 @@ public class FreightAuton extends LinearOpMode {
 
         //forward
         do {
-            drivePower = fakePid_DrivingEdition(position4, positionTracker, speed, adjuster, stopTolerance);
+            drivePower = fakePid_DrivingEdition(carousel, positionTracker, speed, adjuster, stopTolerance);
             drivetrain.driveWithGamepad(0.2, drivePower[1], drivePower[2], drivePower[0]);
 
         } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));

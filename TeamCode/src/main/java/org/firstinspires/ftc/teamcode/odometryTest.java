@@ -34,8 +34,8 @@ public class odometryTest extends OpMode {
 
 
     // Odometry parameters
-    private int ticksPerRev = 8192;
-    private double circumference = 15.71;
+    private int ticksPerRev = 8225;
+    private double circumference = 15.725;
     
 
 
@@ -53,12 +53,12 @@ public class odometryTest extends OpMode {
 
         //odometry initialization code
         Odometry positionTracker = new Odometry(
-                new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, (-circumference)), //right pod
+                new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, (circumference)), //right pod
                 new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, (-circumference)), //left pod
-                new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, (-circumference)), //back pod
+                new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, -(circumference)), //back pod
                 50,
-                184/(2*Math.PI), //170.556/ (2*Math.PI), //-169.076 //-6.41, //-120.63  //-2.25 / (2 * Math.PI), //2.25 2.3 // old: -41.577 / (2 * Math.PI)  //6.15 cm from the middle for old   //19.2 cm from the middle for new
-                26.9, //cm between side odometry wheels
+                22.222, //170.556/ (2*Math.PI), //-169.076 //-6.41, //-120.63  //-2.25 / (2 * Math.PI), //2.25 2.3 // old: -41.577 / (2 * Math.PI)  //6.15 cm from the middle for old   //19.2 cm from the middle for new
+                26.7385, //cm between side odometry wheels
                 0, //set to 0 as in auto from last year - in documentation they were set to 5
                 0,
                 0
@@ -128,6 +128,7 @@ public class odometryTest extends OpMode {
         if(gamepad1.right_stick_button){
             // Reset odometry to prevent error buildup
             drivetrain.positionTracker.reset(0, 0, 0);
+            drivetrain.positionTracker.wheelB.resetEncoder();
         }
 
 
@@ -144,6 +145,7 @@ public class odometryTest extends OpMode {
         telemetry.addData("heading", (drivetrain.positionTracker.phi)); // Get the robot's current heading
         telemetry.addData("degrees", (drivetrain.positionTracker.phi*180/Math.PI));
         telemetry.addData("rear cm", ((drivetrain.positionTracker.phi)*26.9)); // Get the robot's current heading
+        telemetry.addData("rear", drivetrain.positionTracker.wheelB.getPosition());
 //        telemetry.addData("tics of rear:", drivetrain.mLB.getPosition());
 //        telemetry.addData("rear cm tics:", drivetrain.mLB.getPosition()*circumference);
     }//end of loop
