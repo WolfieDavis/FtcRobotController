@@ -200,13 +200,13 @@ public class FreightAuton extends LinearOpMode {
             } else {
                 scaleToOne = Math.abs(powerFractions[1]);
             }
-            double fakePidAdjustment = Math.pow(totalDistance, speed[0] / adjuster[0]);
+            double fakePidAdjustment = totalDistance/(totalDistance + adjuster[0]) * speed[0];
             returnPowers[0] = powerFractions[0] / scaleToOne * fakePidAdjustment;
             returnPowers[1] = powerFractions[1] / scaleToOne * fakePidAdjustment;
         }
         double totalTurnDistance = Math.abs(distanceToMove[2]);
         if (totalTurnDistance > stopTolerance[1]) {
-            returnPowers[2] = Math.pow(totalTurnDistance, speed[1] / adjuster[1]) * (distanceToMove[2] >= 0 ? 1 : -1);
+            returnPowers[2] = totalTurnDistance/(totalTurnDistance + adjuster[1]) * speed[1] * (distanceToMove[2] >= 0 ? 1 : -1);
         }
 
 //        //read out positions
