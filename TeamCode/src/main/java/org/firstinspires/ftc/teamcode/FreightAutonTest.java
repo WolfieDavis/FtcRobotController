@@ -13,13 +13,14 @@ import org.firstinspires.ftc.teamcode.api.ServoX;
 import java.util.Arrays;
 
 @Autonomous
-public class FreightAuton extends LinearOpMode {
+public class FreightAutonTest extends LinearOpMode {
 
     // Odometry parameters
     private int ticksPerRev = 8225; //left same as last year
     private double circumference = 15.725; //left same as last year
     private double width = 26.7385; //distance between centers of odometry wheels
-    private double backDistancePerRadian = 22.222; //compensates for the wheel being in the back of the bot
+    private double backDistancePerRadian = 22.222; //TODO: test to see what this is - rotate bot 360 - take the x value and put it over 2pi - it compensates fo the wheel being in the back of the bot
+
 //    private final double TILE_SIZE = 60.96; //NO we're not measuring in fractional tiles this year, SAE is enough as it is
 
     private Drivetrain drivetrain;
@@ -96,8 +97,14 @@ public class FreightAuton extends LinearOpMode {
 
         /* --------------- move robot --------------- */
         //movement parameters
-        float exp = 4; //exponent that the rate curve is raised to
         double[] speed = {0.35, 0.35}; //first arg is for straight line movement, second is for turning
+        /* --- rate curve explained ---
+        (bx)/(bx + a)
+        coeff = b, needs to be > 1
+        adjuster = a, needs to be > 1
+        adjuster/coeff is the x location at which the speed = 1/2 of initial speed */
+        double[] coeff = {2, 2};
+        double[] adjuster = {15, 15};
         double[] stopTolerance = {3, Math.PI / 36}; //acceptable tolerance (cm) for the robot to be in a position
 
         //just needs to be here
@@ -114,7 +121,8 @@ public class FreightAuton extends LinearOpMode {
 
         //forward
         do {
-            drivePower = fakePid_DrivingEdition(initialPos, carousel, positionTracker, speed, exp, stopTolerance);
+//            drivePower = fakePid_DrivingEdition(initialPos, carousel, positionTracker, speed, coeff, adjuster, stopTolerance);
+            drivePower = fakePid_DrivingEdition(initialPos, carousel, positionTracker, speed, stopTolerance);
             drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
 
         } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
@@ -215,7 +223,7 @@ public class FreightAuton extends LinearOpMode {
 //        }
 
     /* ----------- backend of drive code: fake pid, but curved on both ends ----------- */
-    private double[] fakePid_DrivingEdition(double[] startPos, double[] targetPos, Odometry odo, double[] speed, float exp, double[] stopTolerance) {
+    private double[] fakePid_DrivingEdition(double[] startPos, double[] targetPos, Odometry odo, double[] speed, double[] stopTolerance) {
         double[] distBetween = {targetPos[0] - startPos[0], targetPos[1] - startPos[1], targetPos[2] - startPos[2]};
         double totDistBetween = Math.sqrt(Math.pow(distBetween[0], 2) + Math.pow(distBetween[1], 2));
         double[] distanceToMoveRemaining = {targetPos[0] - odo.x, targetPos[1] - (-odo.y), targetPos[2] - odo.phi};
@@ -230,7 +238,7 @@ public class FreightAuton extends LinearOpMode {
             } else {
                 scaleToOne = Math.abs(powerFractions[1]);
             }
-            double fakePidAdjustment = ((-(Math.pow((((totalDistanceRemaining) - (totDistBetween)) / (totDistBetween)), (exp))) + 1)); //curved as it starts and ends - experimental
+                double fakePidAdjustment = ((-(Math.pow((((totalDistanceRemaining) - (totDistBetween)) / (totDistBetween)), 4)) + 1)); //curved as it starts and ends - experimental
             returnPowers[0] = powerFractions[0] / scaleToOne * fakePidAdjustment;
             returnPowers[1] = powerFractions[1] / scaleToOne * fakePidAdjustment;
         }

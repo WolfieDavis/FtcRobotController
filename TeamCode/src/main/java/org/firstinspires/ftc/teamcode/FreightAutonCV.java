@@ -16,8 +16,8 @@ import org.firstinspires.ftc.teamcode.api.TensorFlowX;
 
 import java.util.Arrays;
 
-@Autonomous
-public class FreightAutonDev extends LinearOpMode {
+//@Autonomous
+public class FreightAutonCV extends LinearOpMode {
 
     // Odometry parameters
     private int ticksPerRev = 8192; //left same as last year
