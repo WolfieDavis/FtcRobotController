@@ -13,11 +13,11 @@ public class FreightPIDCalibration extends OpMode {
 
     // Encoder wheel information
 
-    private double circumference = 15.71;
-    private int ticksPerRev = 8192;
+    private double circumference = 15.725;
+    private int ticksPerRev = 8225;
     // Robot width and back encoder wheel ticks per degree
-    private double width = 26.9;
-    private double backDistancePerDegree = 170.556/ (2*Math.PI);
+    private double width = 26.7385;
+    private double backDistancePerDegree = 22.222*(180/Math.PI);
 
     // Size of a tile on the field (in cm)
     private final double TILE_SIZE = 59.69;
@@ -33,9 +33,9 @@ public class FreightPIDCalibration extends OpMode {
     private String[] editingOptions = new String[]{"Kp", "Kd", "Ki"};
 
     // Coordinate to calibrate
-    private FreightPIDCalibration.CalibrationMode mode = CalibrationMode.Y;
+    private FreightPIDCalibration.CalibrationMode mode = CalibrationMode.PHI;
     // Test setpoint
-    private double setpoint = 30;// 2*Math.PI;
+    private double setpoint = 2*Math.PI;
 
     // Controller for tuning
     private ControlledDrivetrain drivetrain;
@@ -51,8 +51,8 @@ public class FreightPIDCalibration extends OpMode {
                 mLB = new DcMotorX(hardwareMap.dcMotor.get("mLB"));
         // Get the odometry wheels
         DcMotorX wheelR = new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, circumference),
-                wheelL = new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, circumference),
-                wheelB = new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, circumference);
+                wheelL = new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, -circumference),
+                wheelB = new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, -circumference);
 
         // Create an odometry instance for the drivetrain
         Odometry positionTracker = new Odometry(wheelR, wheelL, wheelB, 50, backDistancePerDegree, width, 0, 0, 0);

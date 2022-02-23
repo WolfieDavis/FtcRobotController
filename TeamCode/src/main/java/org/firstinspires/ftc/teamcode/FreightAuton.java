@@ -31,7 +31,6 @@ public class FreightAuton extends LinearOpMode {
             mRB,
             mLB,
             spinner,
-            carousel,
             intake,
             wheelR,
             wheelL,
@@ -52,7 +51,7 @@ public class FreightAuton extends LinearOpMode {
         mLB = new DcMotorX(hardwareMap.dcMotor.get("mLB"));
 
         intake = new DcMotorX(hardwareMap.dcMotor.get("intake"));
-        carousel = new DcMotorX(hardwareMap.dcMotor.get("carousel"));
+        spinner = new DcMotorX(hardwareMap.dcMotor.get("spinner"));
         linear = new LimitedMotorX(hardwareMap.dcMotor.get("linear"));
         outtake = new ServoX(hardwareMap.servo.get("outtake"));
 
@@ -71,7 +70,7 @@ public class FreightAuton extends LinearOpMode {
 
         double[] initialPos = {0, 0, 0}; //x, y, phi
         positionTracker.x = initialPos[0];
-        positionTracker.y = initialPos[1];
+        positionTracker.y = -initialPos[1];
         positionTracker.phi = initialPos[2];
 
         Thread positionTracking = new Thread(positionTracker);
@@ -98,16 +97,22 @@ public class FreightAuton extends LinearOpMode {
 
         /* --------------- move robot --------------- */
         //movement parameters
-        double[] speed = {0.2, 0.2}; //first arg is for straight line movement, second is for turning
-        double[] adjuster = {20, 20}; //how "curved" the rate is, needs to be > 1
-        double[] stopTolerance = {5, Math.PI/36}; //acceptable tolerance (cm) for the robot to be in a position
+        double[] speed = {0.35, 0.35}; //first arg is for straight line movement, second is for turning
+        /* --- rate curve explained ---
+        (bx)/(bx + a)
+        coeff = b, needs to be > 1
+        adjuster = a, needs to be > 1
+        adjuster/coeff is the x location at which the speed = 1/2 of initial speed */
+        double[] coeff = {2, 2};
+        double[] adjuster = {15, 15};
+        double[] stopTolerance = {3, Math.PI / 36}; //acceptable tolerance (cm) for the robot to be in a position
 
         //just needs to be here
         double[] drivePower;
 
         //positions
         // double[] position1 = {0, 50, 0}; //x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
-        double[] carousel = {0, 30, 0}; //forward
+        double[] carousel = {0, 50, 0}; //forward
         double[] position2 = {50, 50, 0}; //strafe after forward
         double[] position3 = {0, 0, 0}; //back to 0
         double[] position4 = {30, 30, Math.PI}; //rotate
@@ -116,8 +121,8 @@ public class FreightAuton extends LinearOpMode {
 
         //forward
         do {
-            drivePower = fakePid_DrivingEdition(carousel, positionTracker, speed, adjuster, stopTolerance);
-            drivetrain.driveWithGamepad(0.2, drivePower[1], drivePower[2], drivePower[0]);
+            drivePower = fakePid_DrivingEdition(initialPos, carousel, positionTracker, speed, coeff, adjuster, stopTolerance);
+            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
 
         } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
 
@@ -194,31 +199,55 @@ public class FreightAuton extends LinearOpMode {
 
 
     /* ----------- backend of drive code: fake pid ----------- */
-    private double[] fakePid_DrivingEdition(double[] targetPos, Odometry odo, double[] speed, double[] adjuster, double[] stopTolerance) {
-        double[] distanceToMove = {targetPos[0] - odo.x, targetPos[1] - odo.y, targetPos[2] - odo.phi};
-        double totalDistance = Math.sqrt(Math.pow(distanceToMove[0], 2) + Math.pow(distanceToMove[1], 2));
+//    private double[] fakePid_DrivingEdition(double[] targetPos, Odometry odo, double[] speed, double[] coeff, double[] adjuster, double[] stopTolerance) {
+//        double[] distanceToMove = {targetPos[0] - odo.x, targetPos[1] - (-odo.y), targetPos[2] - odo.phi};
+//        double totalDistance = Math.sqrt(Math.pow(distanceToMove[0], 2) + Math.pow(distanceToMove[1], 2));
+//
+//        double[] returnPowers = {0, 0, 0};
+//        if (totalDistance > stopTolerance[0]) {
+//            double[] powerFractions = {distanceToMove[0] / totalDistance, distanceToMove[1] / totalDistance};
+//            double scaleToOne;
+//            if (powerFractions[0] > powerFractions[1]) {
+//                scaleToOne = Math.abs(powerFractions[0]);
+//            } else {
+//                scaleToOne = Math.abs(powerFractions[1]);
+//            }
+//            double fakePidAdjustment = (coeff[0] * totalDistance)/(coeff[0] * totalDistance + adjuster[0]) * speed[0]; //curned as it approaches - works
+//            returnPowers[0] = powerFractions[0] / scaleToOne * fakePidAdjustment;
+//            returnPowers[1] = powerFractions[1] / scaleToOne * fakePidAdjustment;
+//        }
+//        double totalTurnDistance = Math.abs(distanceToMove[2]);
+//        if (totalTurnDistance > stopTolerance[1]) {
+//            returnPowers[2] = (coeff[1] * totalTurnDistance)/(coeff[1] * totalTurnDistance + adjuster[1]) * speed[1] * (distanceToMove[2] >= 0 ? 1 : -1);
+//        }
+
+    /* ----------- backend of drive code: fake pid, but curved on both ends ----------- */
+    private double[] fakePid_DrivingEdition(double[] startPos, double[] targetPos, Odometry odo, double[] speed, double[] coeff, double[] adjuster, double[] stopTolerance) {
+        double[] totDistBetween = {targetPos[0] - startPos[0], targetPos[1] - startPos[1], targetPos[2] - startPos[2]}
+        double[] distanceToMoveRemaining = {targetPos[0] - odo.x, targetPos[1] - (-odo.y), targetPos[2] - odo.phi};
+        double totalDistanceRemaining = Math.sqrt(Math.pow(distanceToMoveRemaining[0], 2) + Math.pow(distanceToMoveRemaining[1], 2));
 
         double[] returnPowers = {0, 0, 0};
-        if (totalDistance > stopTolerance[0]) {
-            double[] powerFractions = {distanceToMove[0] / totalDistance, distanceToMove[1] / totalDistance};
+        if (totalDistanceRemaining > stopTolerance[0]) {
+            double[] powerFractions = {distanceToMoveRemaining[0] / totalDistanceRemaining, distanceToMoveRemaining[1] / totalDistanceRemaining};
             double scaleToOne;
             if (powerFractions[0] > powerFractions[1]) {
                 scaleToOne = Math.abs(powerFractions[0]);
             } else {
                 scaleToOne = Math.abs(powerFractions[1]);
             }
-            double fakePidAdjustment = totalDistance/(totalDistance + adjuster[0]) * speed[0];
-            returnPowers[0] = powerFractions[0] / scaleToOne * fakePidAdjustment;
-            returnPowers[1] = powerFractions[1] / scaleToOne * fakePidAdjustment;
+//                double fakePidAdjustment = (( -(Math.pow(( ((distanceToMove[1]) - 50) / (50) ), (2.8))) + 1)* 0.5); //curved as it starts and ends - experimental
+            returnPowers[0] = powerFractions[0] / scaleToOne * ((-(Math.pow((((distanceToMoveRemaining[0]) - (totDistBetween[0])) / (totDistBetween[0])), 4)) + 1) * speed[0]);
+            returnPowers[1] = powerFractions[1] / scaleToOne * ((-(Math.pow((((distanceToMoveRemaining[1]) - (totDistBetween[1])) / (totDistBetween[1])), 4)) + 1) * speed[0]);
         }
-        double totalTurnDistance = Math.abs(distanceToMove[2]);
+        double totalTurnDistance = Math.abs(distanceToMoveRemaining[2]);
         if (totalTurnDistance > stopTolerance[1]) {
-            returnPowers[2] = totalTurnDistance/(totalTurnDistance + adjuster[1]) * speed[1] * (distanceToMove[2] >= 0 ? 1 : -1);
+            returnPowers[2] = coeff[1] * ((-(Math.pow((((distanceToMoveRemaining[2]) - (totDistBetween[2])) / (totDistBetween[2])), 4)) + 1) * speed[1]) * (distanceToMoveRemaining[2] >= 0 ? 1 : -1);
         }
 
-//        //read out positions
+        //read out positions
         telemetry.addData("x current", odo.x);
-        telemetry.addData("y current", odo.y);
+        telemetry.addData("y current", -odo.y);
         telemetry.addData("phi current (deg)", odo.phi * 180 / Math.PI);
         telemetry.addData("x target", targetPos[0]);
         telemetry.addData("y target", targetPos[1]);

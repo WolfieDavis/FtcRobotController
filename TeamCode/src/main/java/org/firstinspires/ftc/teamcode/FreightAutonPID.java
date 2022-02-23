@@ -73,7 +73,7 @@ public class FreightAutonPID extends LinearOpMode {
         double[] ki = {22, 20, 20}; //kix, kiy, kiphi
         double[] kd = {22, 20, 20}; //kdx, kdy, kdphi
         drivetrain = new ControlledDrivetrain(mRF, mLF, mRB, mLB, positionTracker, .01, .01, .01, kp, ki, kd, 50);
-        drivetrain.reverse();
+        //drivetrain.reverse();
         drivetrain.telemetry = telemetry;
 
         Thread drivetrainThread = new Thread(drivetrain);

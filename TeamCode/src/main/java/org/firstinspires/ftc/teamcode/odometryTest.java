@@ -128,7 +128,7 @@ public class odometryTest extends OpMode {
         if(gamepad1.right_stick_button){
             // Reset odometry to prevent error buildup
             drivetrain.positionTracker.reset(0, 0, 0);
-            drivetrain.positionTracker.wheelB.resetEncoder();
+            //drivetrain.positionTracker.wheelB.resetEncoder();
         }
 
 

@@ -284,7 +284,7 @@ public class FreightDriveDemo extends OpMode {
             intakeToggle *= -1;
             switch (intakeToggle){
                 case -1 :
-                    intake.setPower(1 * intakeSpinDir);
+                    intake.setPower(0.3 * intakeSpinDir);
                     break;
                 case 1 :
                     intake.setPower(0.0);
