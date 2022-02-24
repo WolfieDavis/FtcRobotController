@@ -94,95 +94,57 @@ public class FreightAuton extends LinearOpMode {
         telemetry.update();
 
 
-        /* --------------- move robot --------------- */
+        /* ------------ setup movement ------------ */
         //movement parameters
-        float exp = 4; //exponent that the rate curve is raised to
-        double[] speed = {0.35, 0.35}; //first arg is for straight line movement, second is for turning
-        double[] stopTolerance = {3, Math.PI / 36}; //acceptable tolerance (cm) for the robot to be in a position
+        double exponent = 4; //4 //exponent that the rate curve is raised to
+        double[] speed = {0.4, 0.35, 0.35}; //x, y, phi     //first argument(number) is for straight line movement, second is for turning
+        double[] stopTolerance = {4, (Math.PI/45)}; //acceptable tolerance (cm for linear, radians for turning) for the robot to be in a position
 
         //just needs to be here
         double[] drivePower;
 
-        //positions
-        // double[] position1 = {0, 50, 0}; //x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
+        //positions: in the format x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
         double[] carousel = {0, 50, 0}; //forward
         double[] position2 = {50, 50, 0}; //strafe after forward
         double[] position3 = {0, 0, 0}; //back to 0
-        double[] position4 = {30, 30, Math.PI}; //rotate
+        double[] position4 = {0, 0, 2*Math.PI}; //rotate
 
-        //for each movement copy this while loop, change position1
-
+        /* --------------- move robot --------------- */
         //forward
         do {
-            drivePower = fakePid_DrivingEdition(initialPos, carousel, positionTracker, speed, exp, stopTolerance);
+            drivePower = fakePid_DrivingEdition(initialPos, carousel, positionTracker, speed, exponent, stopTolerance);
             drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
 
         } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
 
         sleep(500);
-//
-//        //strafe
-//        do {
-//            drivePower = fakePid_DrivingEdition(position2, positionTracker, speed, adjuster, stopTolerance);
-//            drivetrain.driveWithGamepad(0.3, -drivePower[1], drivePower[2], -drivePower[0]);
-//
-//        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
-//
-//        sleep(500);
-//
-//        //go back to 0
-//        do {
-//            drivePower = fakePid_DrivingEdition(position3, positionTracker, speed, adjuster, stopTolerance);
-//            drivetrain.driveWithGamepad(0.3, -drivePower[1], drivePower[2], -drivePower[0]);
-//
-//        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
-//
-//        sleep(500);
-//
-//        do {
-//            drivePower = fakePid_DrivingEdition(position1, positionTracker, speed, adjuster, stopTolerance);
-//            drivetrain.driveWithGamepad(0.2, -drivePower[1], drivePower[2], -drivePower[0]);
-//
-//        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
-//
-//        sleep(500);
-//
-//        //strafe
-//        do {
-//            drivePower = fakePid_DrivingEdition(position2, positionTracker, speed, adjuster, stopTolerance);
-//            drivetrain.driveWithGamepad(0.3, -drivePower[1], drivePower[2], -drivePower[0]);
-//
-//        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
-//
-//        sleep(500);
-//
-//        //go back to 0
-//        do {
-//            drivePower = fakePid_DrivingEdition(position3, positionTracker, speed, adjuster, stopTolerance);
-//            drivetrain.driveWithGamepad(0.3, -drivePower[1], drivePower[2], -drivePower[0]);
-//
-//        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
-//
-//        sleep(500);
-//
-//        //spin
-//        do {
-//            drivePower = fakePid_DrivingEdition(position4, positionTracker, speed, adjuster, stopTolerance);
-//            drivetrain.driveWithGamepad(0.5, -drivePower[1], drivePower[2], -drivePower[0]);
-//
-//        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
-//
-//        sleep(1000);
+
+        do {
+            drivePower = fakePid_DrivingEdition(carousel, position2, positionTracker, speed, exponent, stopTolerance);
+            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+
+        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
+
+        sleep(500);
+
+        do {
+            drivePower = fakePid_DrivingEdition(position2, position3, positionTracker, speed, exponent, stopTolerance);
+            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+
+        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
+
+        sleep(500);
+
+        do {
+            drivePower = fakePid_DrivingEdition(position3, position4, positionTracker, speed, exponent, stopTolerance);
+            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+
+        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
+
+        sleep(500);
 
         /* ------------------ other ------------------ */
-
-
         spinDucks(0.5, 500); //turns on carousel spinner at power 0.5 for 500ms (or whatever you set them to)
-//        linear.setPower(.8);
-//        sleep(200);
-//        linear.setPower(0);
-//        outtake.setAngle(80);
-//        sleep(500);
 
 
         /* ---------------- shut down ---------------- */
@@ -191,31 +153,8 @@ public class FreightAuton extends LinearOpMode {
     }//end of runOpMode
 
 
-    /* ----------- backend of drive code: fake pid ----------- */
-//    private double[] fakePid_DrivingEdition(double[] targetPos, Odometry odo, double[] speed, double[] coeff, double[] adjuster, double[] stopTolerance) {
-//        double[] distanceToMove = {targetPos[0] - odo.x, targetPos[1] - (-odo.y), targetPos[2] - odo.phi};
-//        double totalDistance = Math.sqrt(Math.pow(distanceToMove[0], 2) + Math.pow(distanceToMove[1], 2));
-//
-//        double[] returnPowers = {0, 0, 0};
-//        if (totalDistance > stopTolerance[0]) {
-//            double[] powerFractions = {distanceToMove[0] / totalDistance, distanceToMove[1] / totalDistance};
-//            double scaleToOne;
-//            if (powerFractions[0] > powerFractions[1]) {
-//                scaleToOne = Math.abs(powerFractions[0]);
-//            } else {
-//                scaleToOne = Math.abs(powerFractions[1]);
-//            }
-//            double fakePidAdjustment = (coeff[0] * totalDistance)/(coeff[0] * totalDistance + adjuster[0]) * speed[0]; //curned as it approaches - works
-//            returnPowers[0] = powerFractions[0] / scaleToOne * fakePidAdjustment;
-//            returnPowers[1] = powerFractions[1] / scaleToOne * fakePidAdjustment;
-//        }
-//        double totalTurnDistance = Math.abs(distanceToMove[2]);
-//        if (totalTurnDistance > stopTolerance[1]) {
-//            returnPowers[2] = (coeff[1] * totalTurnDistance)/(coeff[1] * totalTurnDistance + adjuster[1]) * speed[1] * (distanceToMove[2] >= 0 ? 1 : -1);
-//        }
-
     /* ----------- backend of drive code: fake pid, but curved on both ends ----------- */
-    private double[] fakePid_DrivingEdition(double[] startPos, double[] targetPos, Odometry odo, double[] speed, float exp, double[] stopTolerance) {
+    private double[] fakePid_DrivingEdition(double[] startPos, double[] targetPos, Odometry odo, double[] speed, double exponent, double[] stopTolerance) {
         double[] distBetween = {targetPos[0] - startPos[0], targetPos[1] - startPos[1], targetPos[2] - startPos[2]};
         double totDistBetween = Math.sqrt(Math.pow(distBetween[0], 2) + Math.pow(distBetween[1], 2));
         double[] distanceToMoveRemaining = {targetPos[0] - odo.x, targetPos[1] - (-odo.y), targetPos[2] - odo.phi};
@@ -230,9 +169,9 @@ public class FreightAuton extends LinearOpMode {
             } else {
                 scaleToOne = Math.abs(powerFractions[1]);
             }
-            double fakePidAdjustment = ((-(Math.pow((((totalDistanceRemaining) - (totDistBetween)) / (totDistBetween)), (exp))) + 1)); //curved as it starts and ends - experimental
-            returnPowers[0] = powerFractions[0] / scaleToOne * fakePidAdjustment;
-            returnPowers[1] = powerFractions[1] / scaleToOne * fakePidAdjustment;
+            double fakePidAdjustment = (-(Math.pow((((totalDistanceRemaining) - (totDistBetween)) / (totDistBetween)), (exponent))) + 1); //curved as it starts and ends - experimental
+            returnPowers[0] = powerFractions[0] / scaleToOne * fakePidAdjustment * speed[0];
+            returnPowers[1] = powerFractions[1] / scaleToOne * fakePidAdjustment * speed[1];
         }
         double totalTurnDistance = Math.abs(distanceToMoveRemaining[2]);
         if (totalTurnDistance > stopTolerance[1]) {

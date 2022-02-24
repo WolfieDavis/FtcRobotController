@@ -112,7 +112,7 @@ public class FreightAutonTest extends LinearOpMode {
 
         //positions
         // double[] position1 = {0, 50, 0}; //x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
-        double[] carousel = {0, 50, 0}; //forward
+        double[] carousel = {0, 0, Math.PI}; //forward
         double[] position2 = {50, 50, 0}; //strafe after forward
         double[] position3 = {0, 0, 0}; //back to 0
         double[] position4 = {30, 30, Math.PI}; //rotate
@@ -121,8 +121,8 @@ public class FreightAutonTest extends LinearOpMode {
 
         //forward
         do {
-//            drivePower = fakePid_DrivingEdition(initialPos, carousel, positionTracker, speed, coeff, adjuster, stopTolerance);
-            drivePower = fakePid_DrivingEdition(initialPos, carousel, positionTracker, speed, stopTolerance);
+            drivePower = fakePid_DrivingEdition(initialPos, carousel, positionTracker, speed, coeff, adjuster, stopTolerance);
+//            drivePower = fakePid_DrivingEdition(initialPos, carousel, positionTracker, speed, stopTolerance);
             drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
 
         } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
@@ -223,7 +223,7 @@ public class FreightAutonTest extends LinearOpMode {
 //        }
 
     /* ----------- backend of drive code: fake pid, but curved on both ends ----------- */
-    private double[] fakePid_DrivingEdition(double[] startPos, double[] targetPos, Odometry odo, double[] speed, double[] stopTolerance) {
+    private double[] fakePid_DrivingEdition(double[] startPos, double[] targetPos, Odometry odo, double[] speed, double[] coeff, double[] adjuster, double[] stopTolerance) {
         double[] distBetween = {targetPos[0] - startPos[0], targetPos[1] - startPos[1], targetPos[2] - startPos[2]};
         double totDistBetween = Math.sqrt(Math.pow(distBetween[0], 2) + Math.pow(distBetween[1], 2));
         double[] distanceToMoveRemaining = {targetPos[0] - odo.x, targetPos[1] - (-odo.y), targetPos[2] - odo.phi};
@@ -238,13 +238,15 @@ public class FreightAutonTest extends LinearOpMode {
             } else {
                 scaleToOne = Math.abs(powerFractions[1]);
             }
-                double fakePidAdjustment = ((-(Math.pow((((totalDistanceRemaining) - (totDistBetween)) / (totDistBetween)), 4)) + 1)); //curved as it starts and ends - experimental
+                double fakePidAdjustment = ((-(Math.pow((((totalDistanceRemaining) - (totDistBetween)) / (totDistBetween)), 4)) + 1) * speed[0]); //curved as it starts and ends - experimental
             returnPowers[0] = powerFractions[0] / scaleToOne * fakePidAdjustment;
             returnPowers[1] = powerFractions[1] / scaleToOne * fakePidAdjustment;
         }
         double totalTurnDistance = Math.abs(distanceToMoveRemaining[2]);
         if (totalTurnDistance > stopTolerance[1]) {
-            returnPowers[2] = speed[2] * (distanceToMoveRemaining[2] >= 0 ? 1 : -1);
+//            returnPowers[2] = (coeff[1] * totalTurnDistance)/(coeff[1] * totalTurnDistance + adjuster[1]) * speed[1] * (distanceToMoveRemaining[2] >= 0 ? 1 : -1);
+//            returnPowers[2] = speed[1] * (distanceToMoveRemaining[2] >= 0 ? 1 : -1);
+            returnPowers[2] = ((-(Math.pow((((totalTurnDistance) - (distBetween[2])) / (distBetween[2])), 4)) + 1)) * (distanceToMoveRemaining[2] >= 0 ? 1 : -1); //TODO: get curved rates for turning working
         }
 
         //read out positions
