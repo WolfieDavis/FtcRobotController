@@ -12,8 +12,8 @@ import org.firstinspires.ftc.teamcode.api.ServoX;
 
 import java.util.Arrays;
 
-@Autonomous
-public class FreightAuton extends LinearOpMode {
+//@Autonomous
+public class FreightAutonOLD extends LinearOpMode {
 
     // Odometry parameters
     private int ticksPerRev = 8225; //left same as last year
