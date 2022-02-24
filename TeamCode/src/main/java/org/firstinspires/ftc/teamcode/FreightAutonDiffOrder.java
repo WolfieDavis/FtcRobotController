@@ -187,11 +187,11 @@ public class FreightAutonDiffOrder extends LinearOpMode {
 
         //raise and dump
         do {
-//            if (levelTarget == 2) {
-//                linear.setPower(0.8);
-//            } else {
+            if (levelTarget == 2) {
+                linear.setPower(0.8);
+            } else {
                 linear.setVelocity(fakePid(linear, dumpLevel[levelTarget], 0.8, 50, 0.625)); //change the 3rd arg to adjust slow down speed, should be >1
-//            }
+            }
         } while (linear.getPosition() < (dumpLevel[levelTarget]) && !isStopRequested());
         sleep(250);
         outtake.goToAngle(outtakeDumpPos, 1500);
