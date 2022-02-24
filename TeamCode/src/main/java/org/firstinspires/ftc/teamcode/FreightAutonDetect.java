@@ -3,6 +3,10 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+
 import org.firstinspires.ftc.teamcode.api.ControlledDrivetrain;
 import org.firstinspires.ftc.teamcode.api.DcMotorX;
 import org.firstinspires.ftc.teamcode.api.Drivetrain;
@@ -13,7 +17,7 @@ import org.firstinspires.ftc.teamcode.api.ServoX;
 import java.util.Arrays;
 
 @Autonomous
-public class FreightAuton extends LinearOpMode {
+public class FreightAutonDetect extends LinearOpMode {
 
     // Odometry parameters
     private int ticksPerRev = 8225; //left same as last year
@@ -41,6 +45,7 @@ public class FreightAuton extends LinearOpMode {
             odoL,
             odoR,
             odoB;
+    DistanceSensor detect;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -55,6 +60,7 @@ public class FreightAuton extends LinearOpMode {
         spinner = new DcMotorX(hardwareMap.dcMotor.get("spinner"));
         linear = new LimitedMotorX(hardwareMap.dcMotor.get("linear"), 1607, 13.6875);
         outtake = new ServoX(hardwareMap.servo.get("outtake"));
+        detect = hardwareMap.get(DistanceSensor.class, "detect");
 
         // Get the odometry wheels
         wheelR = new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, (circumference));
@@ -92,23 +98,23 @@ public class FreightAuton extends LinearOpMode {
         /* ------------ setup movement ------------ */
         //movement parameters
         double exponent = 4; //4 //exponent that the rate curve is raised to
-        double[] speed = {0.4, 0.35, 0.35}; //x, y, phi     //first argument(number) is for straight line movement, second is for turning
-        double[] stopTolerance = {4, (Math.PI/45)}; //acceptable tolerance (cm for linear, radians for turning) for the robot to be in a position
+        double[] speed = {0.4, 0.3, 0.35}; //x, y, phi     //first argument(number) is for straight line movement, second is for turning
+        double[] stopTolerance = {4, (Math.PI / 45)}; //acceptable tolerance (cm for linear, radians for turning) for the robot to be in a position
 
         //just needs to be here
         double[] drivePower;
 
         //positions: in the format x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
-        double[] carousel = {27.5, -35, 0}; //-33 for y
-        double[] asu = {118.5, -102, 0}; //-102 for y
-        double[] warehouse = {89, -25, 0};
-        double[] clearWall = {initialPos[0]+carousel[0], initialPos[1], initialPos[2]};
-        double[] detect1 = {68.5, -93.5, 0};
-        double[] detect2 = {68.5, -74, 0};
-        double[] detect3 = {68.5, -50.8, 0};
+        double[] carousel = {26, -33, 0}; //27.5, -33, 0
+        double[] ash = {118.5, -105, 0}; //-102 for y
+        double[] asuPark = {89, -25, 0};
+        double[] clearWall = {initialPos[0] + 15, initialPos[1], initialPos[2]};
+        double[] detect2 = {53, -91, 0}; //68.5 too far
+        double[] detect1 = {53, -70, 0};
+        double[] detect0 = {53, -48.5, 0};
 
         //outtake positions
-        double[] dumpLevel = {4, 9, 13.6875}; //low, med, high
+        double[] dumpLevel = {3, 8, 13.6875}; //low, med, high
         double outtakeTravelPos = 137.5; //servo position for travel
         double outtakeDumpPos = 85; //servo position for dump
 
@@ -123,48 +129,84 @@ public class FreightAuton extends LinearOpMode {
         } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
         sleep(500);
 
-        //detect freight TODO: write more code and make this actually work
-        int levelTarget;
-        if(1==1) {
-            levelTarget = 2;
-        }
-
-        //go to carousel
-        long startCarousel = System.currentTimeMillis();
-        long timeOutCarousel = 3000;
+        //go to detect location
         do {
-            drivePower = fakePid_DrivingEdition(clearWall, carousel, positionTracker, speed, exponent, stopTolerance);
+            drivePower = fakePid_DrivingEdition(clearWall, detect2, positionTracker, speed, exponent, stopTolerance);
             drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
-        } while ((!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0})) || ((System.currentTimeMillis() - startCarousel) < timeOutCarousel));
-
-        //spin carousel
-        spin(spinner, -0.5, 4500); //turns on carousel spinner at power 0.5 for 500ms (or whatever you set them to)
-
-        //go to asu
-        long startASU = System.currentTimeMillis();
-        long timeOutASU = 3000;
-        do {
-            drivePower = fakePid_DrivingEdition(carousel, asu, positionTracker, speed, exponent, stopTolerance);
-            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
-        } while (
-                ((System.currentTimeMillis() - startASU) < timeOutASU) || (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}))
-                );
+        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
         sleep(500);
 
-        //raise and dump
-        do {
-            linear.setVelocity(fakePid(linear, dumpLevel[levelTarget], 0.8, 50, 0.625)); //change the 3rd arg to adjust slow down speed, should be >1
-        } while (linear.getPosition() < dumpLevel[levelTarget]);
-        outtake.goToAngle(outtakeDumpPos, 1500);
-//        outtake.goToAngle(outtakeTravelPos, 500);
+        //detect freight TODO: write more code and make this actually work
+        int levelTarget;
+        double distance = detect.getDistance(DistanceUnit.CM);
+        double detectZone[];
 
-        //park in warehouse
-        long startPark = System.currentTimeMillis();
-        long timeOutPark = 3000;
-        do {
-            drivePower = fakePid_DrivingEdition(asu, warehouse, positionTracker, speed, exponent, stopTolerance);
-            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
-        } while ((!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0})) || ((System.currentTimeMillis() - startPark) < timeOutPark));
+        if (distance < 20) {
+            levelTarget = 2;
+            detectZone = detect2;
+        } else {
+            do {
+                drivePower = fakePid_DrivingEdition(detect2, detect1, positionTracker, speed, exponent, stopTolerance);
+                drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+            } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
+            sleep(500);
+
+            distance = detect.getDistance(DistanceUnit.CM);
+            if (distance < 20) {
+                levelTarget = 1;
+                detectZone = detect2;
+            } else {
+                levelTarget = 0;
+                detectZone = detect1;
+            }
+        }
+
+        if (levelTarget == 0){
+            telemetry.addData("level", "low");
+        } else if (levelTarget == 1){
+            telemetry.addData("level", "middle");
+        } else {
+            telemetry.addData("level", "top");
+        }
+//        telemetry.addData("level", levelTarget);
+        telemetry.update();
+
+        wait(10000);
+
+//        //go to ash
+//        long startASH = System.currentTimeMillis();
+//        long timeOutASH = 6000;
+//        do {
+//            drivePower = fakePid_DrivingEdition(detectZone, ash, positionTracker, speed, exponent, stopTolerance);
+//            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+//        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startASH) < timeOutASH));
+//        sleep(500);
+//
+//        //raise and dump
+//        do {
+//            linear.setPower(0.8);
+//        } while (linear.getPosition() < dumpLevel[levelTarget]);
+//        outtake.goToAngle(outtakeDumpPos, 1500);
+////        outtake.goToAngle(outtakeTravelPos, 500);
+//
+//        //go to carousel
+//        long startCarousel = System.currentTimeMillis();
+//        long timeOutCarousel = 4500;
+//        do {
+//            drivePower = fakePid_DrivingEdition(ash, carousel, positionTracker, speed, exponent, stopTolerance);
+//            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+//        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startCarousel) < timeOutCarousel));
+//
+//        //spin carousel
+//        spin(spinner, -0.5, 6000); //turns on carousel spinner at power 0.5 for 500ms (or whatever you set them to)
+//
+//        //park in asu
+//        long startPark = System.currentTimeMillis();
+//        long timeOutPark = 4500;
+//        do {
+//            drivePower = fakePid_DrivingEdition(carousel, asuPark, positionTracker, speed, exponent, stopTolerance);
+//            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+//        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startPark) < timeOutPark));
 
 
         /* ---------------- shut down ---------------- */
@@ -212,11 +254,11 @@ public class FreightAuton extends LinearOpMode {
 
     /* ---------- used to slow a motor down when approching target pos ---------- */
     /* ------------- returns (distance left to travel)^(1/adjuster) ------------- */
-    private double fakePid(DcMotorX motor, double targetPos, double speed, double adjuster, double stopTolerance){
+    private double fakePid(DcMotorX motor, double targetPos, double speed, double adjuster, double stopTolerance) {
         double currentPos = motor.getPosition();
         double distanceToMove = Math.abs(targetPos - currentPos);
-        if (distanceToMove > stopTolerance){
-            return Math.pow(distanceToMove,speed/adjuster)*(currentPos < targetPos? 1:-1);
+        if (distanceToMove > stopTolerance) {
+            return Math.pow(distanceToMove, speed / adjuster) * (currentPos < targetPos ? 1 : -1);
         } else {
             return 0.0;
         }

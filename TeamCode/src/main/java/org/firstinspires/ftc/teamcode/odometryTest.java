@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.teamcode.api.DcMotorX;
 import org.firstinspires.ftc.teamcode.api.Drivetrain;
@@ -21,6 +23,8 @@ import org.firstinspires.ftc.teamcode.api.Odometry;
 
 @TeleOp
 public class odometryTest extends OpMode {
+
+    DistanceSensor detect;
 
     private ControlledDrivetrain drivetrain;
     private ServoX
@@ -79,6 +83,8 @@ public class odometryTest extends OpMode {
     public void loop() {
 
         /* ------------- define variables to keep track of the controls ------------- */
+
+        detect = hardwareMap.get(DistanceSensor.class, "detect");
 
         //joystick values for driving.
         double leftX = gamepad1.left_stick_x;
@@ -148,6 +154,9 @@ public class odometryTest extends OpMode {
         telemetry.addData("rear", drivetrain.positionTracker.wheelB.getPosition());
 //        telemetry.addData("tics of rear:", drivetrain.mLB.getPosition());
 //        telemetry.addData("rear cm tics:", drivetrain.mLB.getPosition()*circumference);
+
+        telemetry.addData("distance", detect.getDistance(DistanceUnit.CM));
+
     }//end of loop
 
     /* ------------------ used to "curve" the joystick input ------------------ */
