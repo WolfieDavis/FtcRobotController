@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -24,7 +25,8 @@ import org.firstinspires.ftc.teamcode.api.Odometry;
 @TeleOp
 public class odometryTest extends OpMode {
 
-    DistanceSensor detect;
+    DistanceSensor detectRed;
+//    LynxI2cColorRangeSensor detectL;
 
     private ControlledDrivetrain drivetrain;
     private ServoX
@@ -84,7 +86,8 @@ public class odometryTest extends OpMode {
 
         /* ------------- define variables to keep track of the controls ------------- */
 
-        detect = hardwareMap.get(DistanceSensor.class, "detect");
+        detectRed = hardwareMap.get(DistanceSensor.class, "detectRed");
+//        detectL = hardwareMap.get(LynxI2cColorRangeSensor.class, "detectL");
 
         //joystick values for driving.
         double leftX = gamepad1.left_stick_x;
@@ -155,8 +158,8 @@ public class odometryTest extends OpMode {
 //        telemetry.addData("tics of rear:", drivetrain.mLB.getPosition());
 //        telemetry.addData("rear cm tics:", drivetrain.mLB.getPosition()*circumference);
 
-        telemetry.addData("distance", detect.getDistance(DistanceUnit.CM));
-
+        telemetry.addData("distance", detectRed.getDistance(DistanceUnit.CM));
+//        telemetry.addData("distance", detectL.getDistance(DistanceUnit.CM));
     }//end of loop
 
     /* ------------------ used to "curve" the joystick input ------------------ */

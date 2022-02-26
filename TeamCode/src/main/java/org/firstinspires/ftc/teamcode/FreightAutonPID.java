@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.api.ServoX;
 
 import java.util.Arrays;
 
-@Autonomous
+//@Autonomous
 public class FreightAutonPID extends LinearOpMode {
 
     // Odometry parameters

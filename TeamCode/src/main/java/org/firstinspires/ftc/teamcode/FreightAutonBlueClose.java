@@ -2,12 +2,9 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 
-import org.firstinspires.ftc.teamcode.api.ControlledDrivetrain;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.api.DcMotorX;
 import org.firstinspires.ftc.teamcode.api.Drivetrain;
 import org.firstinspires.ftc.teamcode.api.LimitedMotorX;
@@ -17,7 +14,10 @@ import org.firstinspires.ftc.teamcode.api.ServoX;
 import java.util.Arrays;
 
 @Autonomous
-public class FreightAutonDiffOrder extends LinearOpMode {
+public class FreightAutonBlueClose extends LinearOpMode {
+
+    int side = -1; //modifier for x coordinates: set to 1 for red, or -1 for blue
+    //todo: also remember to swap distance sensor to detectBlue for blue or detectRed for red
 
     // Odometry parameters
     private int ticksPerRev = 8225; //left same as last year
@@ -45,7 +45,8 @@ public class FreightAutonDiffOrder extends LinearOpMode {
             odoL,
             odoR,
             odoB;
-    DistanceSensor detect;
+//    DistanceSensor detectBlue;
+    DistanceSensor detectRed;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -58,9 +59,17 @@ public class FreightAutonDiffOrder extends LinearOpMode {
         //set up other motors
         intake = new DcMotorX(hardwareMap.dcMotor.get("intake"));
         spinner = new DcMotorX(hardwareMap.dcMotor.get("spinner"));
-        linear = new LimitedMotorX(hardwareMap.dcMotor.get("linear"), 1607, 13.6875);
+
+        linear = new LimitedMotorX(hardwareMap.dcMotor.get("linear"), 1607, 34.76625);
+
         outtake = new ServoX(hardwareMap.servo.get("outtake"));
-        detect = hardwareMap.get(DistanceSensor.class, "detect");
+        //servos to raise and lower the odometry pods
+        odoL = new ServoX(hardwareMap.servo.get("odoL"));
+        odoR = new ServoX(hardwareMap.servo.get("odoR"));
+        odoB = new ServoX(hardwareMap.servo.get("odoB"));
+
+//        detectBlue = hardwareMap.get(DistanceSensor.class, "detectBlue");
+        detectRed = hardwareMap.get(DistanceSensor.class, "detectRed");
 
         // Get the odometry wheels
         wheelR = new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, (circumference));
@@ -74,7 +83,7 @@ public class FreightAutonDiffOrder extends LinearOpMode {
         drivetrain = new Drivetrain(mRF, mLF, mRB, mLB);
 
         //sets initial position for the drivetrain
-        double[] initialPos = {17, -95.7, 0}; //x, y, phi
+        double[] initialPos = {17*side, -95.7, 0}; //x, y, phi
         positionTracker.x = initialPos[0];
         positionTracker.y = -initialPos[1];
         positionTracker.phi = initialPos[2];
@@ -89,12 +98,6 @@ public class FreightAutonDiffOrder extends LinearOpMode {
         /* ----------- waiting for start ----------- */
         waitForStart();
 
-        //TODO: drop odometry pods
-//        odoL.setAngle(0);
-//        odoR.setAngle(0);
-//        odoB.setAngle(0); //odoB.goToAngle(0, 500); //gives them time to drop
-
-
         /* ------------ setup movement ------------ */
         //movement parameters
         double exponent = 4; //4 //exponent that the rate curve is raised to
@@ -106,31 +109,38 @@ public class FreightAutonDiffOrder extends LinearOpMode {
         double[] drivePower;
 
         //positions: in the format x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
-//        double[] carousel = {26, -33, 0}; //27.5, -33, 0
-//        double[] carousel = {30, -25, 0}; //29, -26, 0 //closer to wall to not break robot
-        double[] carousel = {32, -23, 0};
-        double[] ash = {118.5, -105, 0}; //-102 for y
-        double[] asuPark = {91.75, -25, 0}; //89, -25, 0
-        double[] clearWall = {initialPos[0] + 15, initialPos[1], initialPos[2]};
-        double[] detect2 = {53, -91, 0}; //68.5 too far
-        double[] detect1 = {53, -68.5, 0};
-        double[] detect0 = {53, -48.5, 0};
+        double[] ash = {-118.5-9, -105+1.5, 0}; //-102 for y
+        double[] detect2 = {-53, -91-1, 0}; //68.5 too far //location for detecting the top placement
+        double[] detect1 = {-53, -68.5, 0}; //location for detecting the middle location
+        double[] carouselStage = {-60, -60, 0};
+        double[] carouselStageSpin = {carouselStage[0], carouselStage[1], Math.PI/2};
 
-        //outtake positions
-        double[] dumpLevel = {1.25, 6.5, 13.6875}; //low (3), med(8), high(13.6875)
+        //positions after reset
+        double[] carouselStageAfterSpin = {0, 0, 0};
+//        double[] carouselNormal = {-45, -25, Math.PI/2}; //32.5, -23, 0
+//        double[] carouselNormal = {-40, -19, Math.PI/2}; //32.5, -23, 0
+        double[] carouselAdjusted = {-30, 18, 0}; //-35
+//        double[] asuParkNormal = {-91.75, -25, Math.PI/2}; //89, -25, 0
+        double[] asuParkAdjusted = {-30, -30, 0};
+
+        //outtake (linear) positions
+        double[] dumpLevel = {3.175, 16.51, 34.625}; // equivalent in inches: {1.25, 6.5, 13.6875}; //low (3), med(8), high(13.6875)
+        double minLinearPos = 0.9525; //0.375in //the btm position of the outake (how far down it will go)
+        double bottomLinearPos = minLinearPos; //0.9
+        double linearMaxSpeed = 0.7;
+
+        //outtake (servo) positions
         double outtakeTravelPos = 137.5; //servo position for travel
         double outtakeDumpPos = 85; //servo position for dump
+        double outtakeCollectPos = 180;
 
         /* --------------- move robot --------------- */
-        //move bucket up
-        outtake.goToAngle(outtakeTravelPos, 500);
-
-        //strafe clear of the wall
-//        do {
-//            drivePower = fakePid_DrivingEdition(initialPos, clearWall, positionTracker, speed, exponent, stopTolerance);
-//            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
-//        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
-//        sleep(500);
+        //tilt bucket up and drop odometry pods
+//        outtake.goToAngle(outtakeTravelPos, 500);
+        outtake.setAngle(outtakeTravelPos);
+        odoL.setAngle(0);
+        odoR.setAngle(0);
+        odoB.goToAngle(0, 2000);
 
         //go to detect location
         do {
@@ -141,7 +151,8 @@ public class FreightAutonDiffOrder extends LinearOpMode {
 
         //detect freight TODO: write more code and make this actually work
         int levelTarget;
-        double distance = detect.getDistance(DistanceUnit.CM);
+//        double distance = detectBlue.getDistance(DistanceUnit.CM);
+        double distance = detectRed.getDistance(DistanceUnit.CM);
         double detectZone[];
 
         if (distance < 20) {
@@ -154,7 +165,8 @@ public class FreightAutonDiffOrder extends LinearOpMode {
             } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
             sleep(750);
 
-            distance = detect.getDistance(DistanceUnit.CM);
+//            distance = detectBlue.getDistance(DistanceUnit.CM);
+            distance = detectRed.getDistance(DistanceUnit.CM);
             if (distance < 20) {
                 levelTarget = 1;
                 detectZone = detect2;
@@ -171,14 +183,13 @@ public class FreightAutonDiffOrder extends LinearOpMode {
         } else {
             telemetry.addData("level", "top");
         }
-//        telemetry.addData("level", levelTarget);
         telemetry.update();
 
         sleep(500);
 
         //go to ash
         long startASH = System.currentTimeMillis();
-        long timeOutASH = 3000;
+        long timeOutASH = 2500;
         do {
             drivePower = fakePid_DrivingEdition(detectZone, ash, positionTracker, speed, exponent, stopTolerance);
             drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
@@ -188,34 +199,65 @@ public class FreightAutonDiffOrder extends LinearOpMode {
         //raise and dump
         do {
             if (levelTarget == 2) {
-                linear.setPower(0.8);
+                linear.setPower(0.5);
             } else {
-                linear.setVelocity(fakePid(linear, dumpLevel[levelTarget], 0.8, 50, 0.625)); //change the 3rd arg to adjust slow down speed, should be >1
+            linear.setVelocity(fakePid(linear, linear.getPosition(), dumpLevel[levelTarget], linearMaxSpeed, 1.5)); //change the 3rd arg to adjust slow down speed, should be >1
             }
         } while (linear.getPosition() < (dumpLevel[levelTarget]) && !isStopRequested());
         sleep(250);
         outtake.goToAngle(outtakeDumpPos, 1500);
-//        outtake.goToAngle(outtakeTravelPos, 500);
+
+        //carousel staging location
+        long startCarouselStage = System.currentTimeMillis();
+        long timeOutCarouselStage = 3000;
+        do {
+            drivePower = fakePid_DrivingEdition(ash, carouselStage, positionTracker, speed, 6, stopTolerance);
+            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startCarouselStage) < timeOutCarouselStage));
+        sleep(250);
+
+        //carousel staging location - spin robot to get ready
+        long startCarouselStageSpin = System.currentTimeMillis();
+        long timeOutCarouselStageSpin = 3000;
+        do {
+            drivePower = fakePid_DrivingEdition(carouselStage, carouselStageSpin, positionTracker, speed, 6, stopTolerance);
+            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startCarouselStageSpin) < timeOutCarouselStageSpin));
+        sleep(500);
+
+        //reset odometry system heading
+        positionTracker.x = carouselStageAfterSpin[0];
+        positionTracker.y = carouselStageAfterSpin[1];
+        positionTracker.phi = carouselStageAfterSpin[2];
+        sleep(50);
 
         //go to carousel
         long startCarousel = System.currentTimeMillis();
-        long timeOutCarousel = 4500;
+        long timeOutCarousel = 2000;
         do {
-                drivePower = fakePid_DrivingEdition(ash, carousel, positionTracker, speed, exponent, stopTolerance);
-                drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+            drivePower = fakePid_DrivingEdition(carouselStageAfterSpin, carouselAdjusted, positionTracker, speed, 6, stopTolerance);
+            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
         } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startCarousel) < timeOutCarousel));
+        sleep(250);
 
         //spin carousel
-        spin(spinner, -0.5, 6000); //turns on carousel spinner at power 0.5 for 500ms (or whatever you set them to)
+        spin(spinner, -0.5*side, 6000); //turns on carousel spinner at power 0.5 for 500ms (or whatever you set them to)
 
         //park in asu
         long startPark = System.currentTimeMillis();
-        long timeOutPark = 3000;
+        long timeOutPark = 2750;
         do {
-                drivePower = fakePid_DrivingEdition(carousel, asuPark, positionTracker, speed, exponent, stopTolerance);
-                drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+            drivePower = fakePid_DrivingEdition(carouselAdjusted, asuParkAdjusted, positionTracker, speed, exponent, stopTolerance);
+            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
         } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startPark) < timeOutPark));
+        sleep(250);
 
+        //lower slide to be ready to start teleop
+        outtake.goToAngle(outtakeTravelPos, 750);
+        do {
+            linear.setPower(-0.5);
+        } while (linear.getPosition() > (bottomLinearPos) && !isStopRequested());
+        sleep(500);
 
         /* ---------------- shut down ---------------- */
         drivetrain.setBrake(true);
@@ -233,15 +275,9 @@ public class FreightAutonDiffOrder extends LinearOpMode {
         double[] returnPowers = {0, 0, 0};
         if (totalDistanceRemaining > stopTolerance[0]) {
             double[] powerFractions = {distanceToMoveRemaining[0] / totalDistanceRemaining, distanceToMoveRemaining[1] / totalDistanceRemaining};
-            double scaleToOne;
-            if (powerFractions[0] > powerFractions[1]) {
-                scaleToOne = Math.abs(powerFractions[0]);
-            } else {
-                scaleToOne = Math.abs(powerFractions[1]);
-            }
-            double fakePidAdjustment = (-(Math.pow((((totalDistanceRemaining) - (totDistBetween)) / (totDistBetween)), (exponent))) + 1); //curved as it starts and ends - experimental
-            returnPowers[0] = powerFractions[0] / scaleToOne * fakePidAdjustment * speed[0];
-            returnPowers[1] = powerFractions[1] / scaleToOne * fakePidAdjustment * speed[1];
+            double fakePidAdjustment = (-(Math.pow((((totalDistanceRemaining) - (totDistBetween / 1.5)) / (totDistBetween / 1.5)), (exponent))) + 1); //curved as it starts and ends - experimental
+            returnPowers[0] = powerFractions[0] * fakePidAdjustment * speed[0];
+            returnPowers[1] = powerFractions[1] * fakePidAdjustment * speed[1];
         }
         double totalTurnDistance = Math.abs(distanceToMoveRemaining[2]);
         if (totalTurnDistance > stopTolerance[1]) {
@@ -249,28 +285,44 @@ public class FreightAutonDiffOrder extends LinearOpMode {
         }
 
         //read out positions
-//        telemetry.addData("x current", odo.x);
-//        telemetry.addData("y current", -odo.y);
-//        telemetry.addData("phi current (deg)", odo.phi * 180 / Math.PI);
-//        telemetry.addData("x target", targetPos[0]);
-//        telemetry.addData("y target", targetPos[1]);
-//        telemetry.addData("phi target (deg)", targetPos[2]);
-//        telemetry.update();
+        telemetry.addData("x current", odo.x);
+        telemetry.addData("y current", -odo.y);
+        telemetry.addData("phi current (deg)", odo.phi * 180 / Math.PI);
+        telemetry.addData("", "");
+        telemetry.addData("x target", targetPos[0]);
+        telemetry.addData("y target", targetPos[1]);
+        telemetry.addData("phi target (deg)", targetPos[2]);
+        telemetry.update();
 
         return returnPowers;
     }
 
     /* ---------- used to slow a motor down when approching target pos ---------- */
     /* ------------- returns (distance left to travel)^(1/adjuster) ------------- */
-    private double fakePid(DcMotorX motor, double targetPos, double speed, double adjuster, double stopTolerance) {
+    private double fakePid(DcMotorX motor, double startPos, double targetPos, double speed, /*double exponent, /*double adjuster,*/ double stopTolerance) {
         double currentPos = motor.getPosition();
+        double totalMoveDist = (targetPos - startPos);
         double distanceToMove = Math.abs(targetPos - currentPos);
-        if (distanceToMove > stopTolerance) {
-            return Math.pow(distanceToMove, speed / adjuster) * (currentPos < targetPos ? 1 : -1);
+
+//        double linearExponent = 6;
+//        if (totalMoveDist < 5) linearExponent = 2;
+//        else if (totalMoveDist < 15) linearExponent = 4;
+//        else if (totalMoveDist < 25) linearExponent = 6;
+//        else linearExponent = 6;
+
+        double negAdjust;
+        if ((totalMoveDist > 0) && ((currentPos - startPos) < 2)) negAdjust = (totalMoveDist - 1);
+        else negAdjust = 0;
+
+        double distanceRemaining = Math.abs(targetPos - currentPos);
+        if (distanceRemaining > stopTolerance) {
+//            return (-(Math.pow((((currentPos) - (totalMoveDist/2) + negAdjust) / (totalMoveDist / 2)), (linearExponent))) + 1) * speed;
+            return Math.pow(distanceToMove, speed / 50) * (currentPos < targetPos ? 1 : -1);
         } else {
             return 0.0;
         }
     }
+
 
     /* ----------------- spins a motor ----------------- */
     private void spin(DcMotorX name, double power, int waitTime) {
