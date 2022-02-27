@@ -284,15 +284,15 @@ public class FreightAutonBlueClose extends LinearOpMode {
             returnPowers[2] = speed[2] * (distanceToMoveRemaining[2] >= 0 ? 1 : -1);
         }
 
-        //read out positions
-        telemetry.addData("x current", odo.x);
-        telemetry.addData("y current", -odo.y);
-        telemetry.addData("phi current (deg)", odo.phi * 180 / Math.PI);
-        telemetry.addData("", "");
-        telemetry.addData("x target", targetPos[0]);
-        telemetry.addData("y target", targetPos[1]);
-        telemetry.addData("phi target (deg)", targetPos[2]);
-        telemetry.update();
+//        //read out positions
+//        telemetry.addData("x current", odo.x);
+//        telemetry.addData("y current", -odo.y);
+//        telemetry.addData("phi current (deg)", odo.phi * 180 / Math.PI);
+//        telemetry.addData("", "");
+//        telemetry.addData("x target", targetPos[0]);
+//        telemetry.addData("y target", targetPos[1]);
+//        telemetry.addData("phi target (deg)", targetPos[2]);
+//        telemetry.update();
 
         return returnPowers;
     }

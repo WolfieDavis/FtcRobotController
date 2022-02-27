@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -15,9 +14,9 @@ import org.firstinspires.ftc.teamcode.api.ServoX;
 import java.util.Arrays;
 
 @Autonomous
-public class FreightAutonRedClose extends LinearOpMode {
+public class FreightAutonBlueFar extends LinearOpMode {
 
-    int side = 1; //modifier for x coordinates: set to 1 for red, or -1 for blue
+    int side = -1; //modifier for x coordinates: set to 1 for red, or -1 for blue
     //todo: also remember to swap distance sensor to detectBlue for blue or detectRed for red
 
     // Odometry parameters
@@ -82,7 +81,7 @@ public class FreightAutonRedClose extends LinearOpMode {
         drivetrain = new Drivetrain(mRF, mLF, mRB, mLB);
 
         //sets initial position for the drivetrain
-        double[] initialPos = {17*side, -95.7, 0}; //x, y, phi
+        double[] initialPos = {17 * side, -201.5, 0}; //x, y, phi
         positionTracker.x = initialPos[0];
         positionTracker.y = -initialPos[1];
         positionTracker.phi = initialPos[2];
@@ -108,11 +107,31 @@ public class FreightAutonRedClose extends LinearOpMode {
         double[] drivePower;
 
         //positions: in the format x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
-        double[] carousel = {32.5*side, -23, 0};
-        double[] ash = {118.5*side, -105, 0}; //-102 for y
-        double[] asuPark = {91.75*side, -25, 0}; //89, -25, 0
-        double[] detect2 = {53*side, -91-1, 0}; //68.5 too far //location for detecting the top placement
-        double[] detect1 = {53*side, -68.5, 0}; //location for detecting the middle location
+        double[] startOffset = {0, -47.25 * 2.54, 0};
+
+        double[] carousel = {32.5 * side, -23, 0};
+        double[] asuPark = {91.75 * side, -25, 0}; //89, -25, 0
+        double[] detect2 = {53 * side, -91 + startOffset[1], 0}; //68.5 too far //location for detecting the top placement
+//        double[] detect1 = {53 * side, -68.5 + startOffset[1], 0}; //location for detecting the middle location
+        double[] detect1 = {53 * side, -188.515, 0}; //location for detecting the middle location
+
+//        double[] ashSpin = {ashStage[0], ashStage[1], -Math.PI};
+        double[] ashSpin = {/*detect1[0]*/ 53 * side, /*detect1[1]*/-188.515, Math.PI/2};
+        double[] ashSpin2 = {/*detect1[0]*/ 53 * side, /*detect1[1]*/-188.515, Math.PI};
+
+        //after reset odometry
+        double[] ashAfterSpin = {ashSpin[1], ashSpin[0], 0};
+        double[] ashNormal = {118.5 * side, -195, Math.PI}; //-102 for y
+        double[] ashAdjusted = {(-65.5-9) * side, 15, 0};  //6.485
+        double[] ashStage = {0 * side, ashAdjusted[1]+5, 0};
+        double[] warehouseStage = {0 * side, 10, 0};
+        double[] approachWall = {29 * side, 0, 0}; //33 //17
+        double[] warehouse = {33 * side, 86.485, 0};
+
+//        double[] ashAdjusted = {-(ashNormal[1]-detect1[1]), -(ashNormal[0]-detect1[0]), 0};
+//        double[] approachWall = {-(-20-detect1[1]), -ashAfterSpin[1], 0}; //17
+//        double[] warehouse = {approachWall[0], (-275-detect1[0]), 0};
+
 
         //outtake (linear) positions
         double[] dumpLevel = {3.175, 16.51, 34.625}; // equivalent in inches: {1.25, 6.5, 13.6875}; //low (3), med(8), high(13.6875)
@@ -126,8 +145,6 @@ public class FreightAutonRedClose extends LinearOpMode {
         double outtakeCollectPos = 180;
 
         /* --------------- move robot --------------- */
-//        linear.resetEncoder();
-
         //tilt bucket up and drop odometry pods
 //        outtake.goToAngle(outtakeTravelPos, 500);
         outtake.setAngle(outtakeTravelPos);
@@ -150,6 +167,12 @@ public class FreightAutonRedClose extends LinearOpMode {
         if (distance < 20) {
             levelTarget = 2;
             detectZone = detect2;
+
+            do {
+                drivePower = fakePid_DrivingEdition(detect2, detect1, positionTracker, detectSpeed, exponent, stopTolerance);
+                drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+            } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
+
         } else {
             do {
                 drivePower = fakePid_DrivingEdition(detect2, detect1, positionTracker, detectSpeed, exponent, stopTolerance);
@@ -174,15 +197,48 @@ public class FreightAutonRedClose extends LinearOpMode {
         } else {
             telemetry.addData("level", "top");
         }
+//        telemetry.addData("level", levelTarget);
         telemetry.update();
 
         sleep(500);
 
-        //go to ash
+        //spin 180
+        long startAshSpin = System.currentTimeMillis();
+        long timeOutAshSpin = 2000;
+        do {
+            drivePower = fakePid_DrivingEdition(detect1, ashSpin, positionTracker, speed, exponent, stopTolerance);
+            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startAshSpin) < timeOutAshSpin));
+        sleep(250);
+
+        long startAshSpin2 = System.currentTimeMillis();
+        long timeOutAshSpin2 = 2000;
+        do {
+            drivePower = fakePid_DrivingEdition(ashSpin, ashSpin2, positionTracker, speed, exponent, stopTolerance);
+            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startAshSpin2) < timeOutAshSpin2));
+        sleep(500);
+
+        //reset odometry
+        positionTracker.x = 0;
+        positionTracker.y = 0;
+        positionTracker.phi = 0;
+        sleep(50);
+
+        //ash stage
+        long startAshStage = System.currentTimeMillis();
+        long timeOutAshStage = 1000;
+        do {
+            drivePower = fakePid_DrivingEdition(ashAfterSpin, ashStage, positionTracker, speed, 8, stopTolerance);
+            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startAshStage) < timeOutAshStage));
+        sleep(250);
+
+        //approach ash
         long startASH = System.currentTimeMillis();
         long timeOutASH = 2500;
         do {
-            drivePower = fakePid_DrivingEdition(detectZone, ash, positionTracker, speed, exponent, stopTolerance);
+            drivePower = fakePid_DrivingEdition(ashStage, ashAdjusted, positionTracker, speed, 8, stopTolerance);
             drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
         } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startASH) < timeOutASH));
         sleep(500);
@@ -192,31 +248,71 @@ public class FreightAutonRedClose extends LinearOpMode {
             if (levelTarget == 2) {
                 linear.setPower(0.5);
             } else {
-            linear.setVelocity(fakePid(linear, linear.getPosition(), dumpLevel[levelTarget], linearMaxSpeed, 1.5)); //change the 3rd arg to adjust slow down speed, should be >1
+                linear.setVelocity(fakePid(linear, linear.getPosition(), dumpLevel[levelTarget], linearMaxSpeed, 1.5)); //change the 3rd arg to adjust slow down speed, should be >1
             }
         } while (linear.getPosition() < (dumpLevel[levelTarget]) && !isStopRequested());
         sleep(250);
         outtake.goToAngle(outtakeDumpPos, 1500);
 
-        //go to carousel
-        long startCarousel = System.currentTimeMillis();
-        long timeOutCarousel = 4500;
-        do {
-            drivePower = fakePid_DrivingEdition(ash, carousel, positionTracker, speed, 6, stopTolerance);
-            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
-        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startCarousel) < timeOutCarousel));
 
-        //spin carousel
-        spin(spinner, -0.5*side, 6000); //turns on carousel spinner at power 0.5 for 500ms (or whatever you set them to)
 
-        //park in asu
-        long startPark = System.currentTimeMillis();
-        long timeOutPark = 2750;
-        do {
-            drivePower = fakePid_DrivingEdition(carousel, asuPark, positionTracker, speed, exponent, stopTolerance);
-            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
-        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startPark) < timeOutPark));
-        sleep(250);
+        /* ---------------- todo: one way - over barriers ---------------- */
+//        //go back to spin location
+//        long startGoBack = System.currentTimeMillis();
+//        long timeOutGoBack = 2500;
+//        do {
+//            drivePower = fakePid_DrivingEdition(ashAdjusted, warehouseStage, positionTracker, speed, 6, stopTolerance);
+//            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+//        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startGoBack) < timeOutGoBack));
+//        sleep(1500);
+//
+//        //raise odometry pods
+//        odoL.setAngle(180);
+//        odoR.setAngle(178);
+//        odoB.goToAngle(155, 2000);
+//
+//
+//        drivetrain.stop();
+//
+//        //drive over barrier to park
+//        double overBarrierPower = 0.8;
+//        long startBarrier = System.currentTimeMillis();
+//        long timeOutBarrier = 100;
+//        do {
+////            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+////            drivetrain.driveWithGamepad(1,0.8,0,0);
+//            drivetrain.mLF.setPower(overBarrierPower);
+//            drivetrain.mLB.setPower(overBarrierPower);
+//            drivetrain.mRF.setPower(overBarrierPower);
+//            drivetrain.mRB.setPower(overBarrierPower);
+//
+//        } while (((System.currentTimeMillis() - startBarrier) < timeOutBarrier));
+//
+//
+        sleep(1000);
+
+
+
+        /* ---------------- todo: other way - through wall edge ---------------- */
+//        //go to wall
+//        long startToWall = System.currentTimeMillis();
+//        long timeOutToWall = 3000;
+//        do {
+//            drivePower = fakePid_DrivingEdition(ashAdjusted, approachWall, positionTracker, speed, exponent, stopTolerance);
+//            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+//        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startToWall) < timeOutToWall) && (detectRed.getDistance(DistanceUnit.CM) > 1));
+//        sleep(500);
+//
+//        //go along wall into warehouse
+//        long startWarehouse = System.currentTimeMillis();
+//        long timeOutWarehouse = 1000;
+//        do {
+//            drivePower = fakePid_DrivingEdition(approachWall, warehouse, positionTracker, speed, exponent, stopTolerance);
+//            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+//        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startWarehouse) < timeOutWarehouse));
+//        sleep(500);
+
+
 
         //lower slide to be ready to start teleop
         outtake.goToAngle(outtakeTravelPos, 750);
@@ -250,10 +346,11 @@ public class FreightAutonRedClose extends LinearOpMode {
             returnPowers[2] = speed[2] * (distanceToMoveRemaining[2] >= 0 ? 1 : -1);
         }
 
-        //read out positions
+//        //read out positions
 //        telemetry.addData("x current", odo.x);
 //        telemetry.addData("y current", -odo.y);
 //        telemetry.addData("phi current (deg)", odo.phi * 180 / Math.PI);
+//        telemetry.addData("", "");
 //        telemetry.addData("x target", targetPos[0]);
 //        telemetry.addData("y target", targetPos[1]);
 //        telemetry.addData("phi target (deg)", targetPos[2]);

@@ -91,6 +91,7 @@ public class freightDrive3 extends OpMode {
 //            linear.setLimits(hardwareMap.touchSensor.get("linearBtmLimit"), 12.0); //UNCOMMENT WITH LIMIT SWITCH
         //tip.setAngle(90);
         ;
+        drivetrain.setBrake(true);
         drivetrain.stop();
 
     }// end of init
