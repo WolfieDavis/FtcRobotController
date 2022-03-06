@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.api.ServoX;
 
 import java.util.Arrays;
 
-@Autonomous
+//@Autonomous
 public class FreightAutonRedFar extends LinearOpMode {
 
     int side = 1; //modifier for x coordinates: set to 1 for red, or -1 for blue
@@ -70,7 +70,7 @@ public class FreightAutonRedFar extends LinearOpMode {
         detectRed = hardwareMap.get(DistanceSensor.class, "detectRed");
 
         // Get the odometry wheels
-        wheelR = new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, (circumference));
+        wheelR = new DcMotorX(hardwareMap.dcMotor.get("odoRear"), ticksPerRev, (circumference));
         wheelL = new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, (-circumference));
         wheelB = new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, -(circumference));
 

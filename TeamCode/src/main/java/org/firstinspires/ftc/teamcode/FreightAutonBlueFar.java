@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.api.ServoX;
 
 import java.util.Arrays;
 
-@Autonomous
+//@Autonomous
 public class FreightAutonBlueFar extends LinearOpMode {
 
     int side = -1; //modifier for x coordinates: set to 1 for red, or -1 for blue
@@ -45,7 +45,8 @@ public class FreightAutonBlueFar extends LinearOpMode {
             odoL,
             odoR,
             odoB;
-    DistanceSensor detectRed;
+//    DistanceSensor detectRed;
+    DistanceSensor detectBlue;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -67,10 +68,11 @@ public class FreightAutonBlueFar extends LinearOpMode {
         odoR = new ServoX(hardwareMap.servo.get("odoR"));
         odoB = new ServoX(hardwareMap.servo.get("odoB"));
 
-        detectRed = hardwareMap.get(DistanceSensor.class, "detectRed");
+//        detectRed = hardwareMap.get(DistanceSensor.class, "detectRed");
+        detectBlue = hardwareMap.get(DistanceSensor.class, "detectBlue");
 
         // Get the odometry wheels
-        wheelR = new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, (circumference));
+        wheelR = new DcMotorX(hardwareMap.dcMotor.get("odoRear"), ticksPerRev, (circumference));
         wheelL = new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, (-circumference));
         wheelB = new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, -(circumference));
 
@@ -116,8 +118,8 @@ public class FreightAutonBlueFar extends LinearOpMode {
         double[] detect1 = {53 * side, -188.515, 0}; //location for detecting the middle location
 
 //        double[] ashSpin = {ashStage[0], ashStage[1], -Math.PI};
-        double[] ashSpin = {/*detect1[0]*/ 53 * side, /*detect1[1]*/-188.515, Math.PI/2};
-        double[] ashSpin2 = {/*detect1[0]*/ 53 * side, /*detect1[1]*/-188.515, Math.PI};
+        double[] ashSpin = {/*detect1[0]*/ 53 * side, /*detect1[1]*/-188.515, -Math.PI/2};
+        double[] ashSpin2 = {/*detect1[0]*/ 53 * side, /*detect1[1]*/-188.515, -Math.PI};
 
         //after reset odometry
         double[] ashAfterSpin = {ashSpin[1], ashSpin[0], 0};
@@ -161,7 +163,8 @@ public class FreightAutonBlueFar extends LinearOpMode {
 
         //detect freight TODO: write more code and make this actually work
         int levelTarget;
-        double distance = detectRed.getDistance(DistanceUnit.CM);
+        double distance = detectBlue.getDistance(DistanceUnit.CM);
+//        double distance = detectRed.getDistance(DistanceUnit.CM);
         double detectZone[];
 
         if (distance < 20) {
@@ -180,7 +183,8 @@ public class FreightAutonBlueFar extends LinearOpMode {
             } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
             sleep(750);
 
-            distance = detectRed.getDistance(DistanceUnit.CM);
+            distance = detectBlue.getDistance(DistanceUnit.CM);
+//            distance = detectRed.getDistance(DistanceUnit.CM);
             if (distance < 20) {
                 levelTarget = 1;
                 detectZone = detect2;

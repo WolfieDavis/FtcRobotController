@@ -45,8 +45,8 @@ public class FreightAutonBlueClose extends LinearOpMode {
             odoL,
             odoR,
             odoB;
-//    DistanceSensor detectBlue;
-    DistanceSensor detectRed;
+    DistanceSensor detectBlue;
+//    DistanceSensor detectRed;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -68,11 +68,11 @@ public class FreightAutonBlueClose extends LinearOpMode {
         odoR = new ServoX(hardwareMap.servo.get("odoR"));
         odoB = new ServoX(hardwareMap.servo.get("odoB"));
 
-//        detectBlue = hardwareMap.get(DistanceSensor.class, "detectBlue");
-        detectRed = hardwareMap.get(DistanceSensor.class, "detectRed");
+        detectBlue = hardwareMap.get(DistanceSensor.class, "detectBlue");
+//        detectRed = hardwareMap.get(DistanceSensor.class, "detectRed");
 
         // Get the odometry wheels
-        wheelR = new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, (circumference));
+        wheelR = new DcMotorX(hardwareMap.dcMotor.get("odoRear"), ticksPerRev, (circumference));
         wheelL = new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, (-circumference));
         wheelB = new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, -(circumference));
 
@@ -96,20 +96,25 @@ public class FreightAutonBlueClose extends LinearOpMode {
         telemetry.update();
 
         /* ----------- waiting for start ----------- */
+//        linear.resetEncoder();
         waitForStart();
 
         /* ------------ setup movement ------------ */
         //movement parameters
         double exponent = 4; //4 //exponent that the rate curve is raised to
-        double[] speed = {0.4, 0.3, 0.35}; //x, y, phi //.35    //first argument(number) is for straight line movement, second is for turning
-        double[] detectSpeed = {0.35, 0.2, 0.35};
+//        double[] speed = {0.4, 0.3, 0.35}; //x, y, phi //.35    //first argument(number) is for straight line movement, second is for turning
+        double[] speed = {0.45, 0.4, 0.35};//todo: fix this??
+//        double[] speed = {0.55, 0.5, 0.35};
+//        double[] detectSpeed = {0.35, 0.2, 0.35};
+        double[] detectSpeed = {0.35, 0.25, 0.35};
         double[] stopTolerance = {4, (Math.PI / 45)}; //4 //acceptable tolerance (cm for linear, radians for turning) for the robot to be in a position
 
         //just needs to be here
         double[] drivePower;
 
         //positions: in the format x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
-        double[] ash = {-118.5-9, -105+1.5, 0}; //-102 for y
+        double[] ash = {-118.5-9, -105+1.5, 0}; //-105+1.5 for y
+        double[] ashLow = {-118.5-9, -105+2.5, 0}; //-105+1.5 for y
         double[] detect2 = {-53, -91-1, 0}; //68.5 too far //location for detecting the top placement
         double[] detect1 = {-53, -68.5, 0}; //location for detecting the middle location
         double[] carouselStage = {-60, -60, 0};
@@ -119,7 +124,8 @@ public class FreightAutonBlueClose extends LinearOpMode {
         double[] carouselStageAfterSpin = {0, 0, 0};
 //        double[] carouselNormal = {-45, -25, Math.PI/2}; //32.5, -23, 0
 //        double[] carouselNormal = {-40, -19, Math.PI/2}; //32.5, -23, 0
-        double[] carouselAdjusted = {-30, 18, 0}; //-35
+//        double[] carouselAdjusted = {-29, 17, 0}; //-35 //-30, 18
+        double[] carouselAdjusted = {-27, 17, 0}; //-35 //-30, 18 //todo: fine tune this
 //        double[] asuParkNormal = {-91.75, -25, Math.PI/2}; //89, -25, 0
         double[] asuParkAdjusted = {-30, -30, 0};
 
@@ -151,12 +157,12 @@ public class FreightAutonBlueClose extends LinearOpMode {
 
         //detect freight TODO: write more code and make this actually work
         int levelTarget;
-//        double distance = detectBlue.getDistance(DistanceUnit.CM);
-        double distance = detectRed.getDistance(DistanceUnit.CM);
+        double distance = detectBlue.getDistance(DistanceUnit.CM);
+//        double distance = detectRed.getDistance(DistanceUnit.CM);
         double detectZone[];
 
         if (distance < 20) {
-            levelTarget = 2;
+            levelTarget = 0;
             detectZone = detect2;
         } else {
             do {
@@ -165,13 +171,13 @@ public class FreightAutonBlueClose extends LinearOpMode {
             } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
             sleep(750);
 
-//            distance = detectBlue.getDistance(DistanceUnit.CM);
-            distance = detectRed.getDistance(DistanceUnit.CM);
+            distance = detectBlue.getDistance(DistanceUnit.CM);
+//            distance = detectRed.getDistance(DistanceUnit.CM);
             if (distance < 20) {
                 levelTarget = 1;
                 detectZone = detect2;
             } else {
-                levelTarget = 0;
+                levelTarget = 2;
                 detectZone = detect1;
             }
         }
@@ -197,24 +203,26 @@ public class FreightAutonBlueClose extends LinearOpMode {
         sleep(500);
 
         //raise and dump
+        long startDump = System.currentTimeMillis();
+        long timeOutDump = 2500;
         do {
             if (levelTarget == 2) {
                 linear.setPower(0.5);
             } else {
             linear.setVelocity(fakePid(linear, linear.getPosition(), dumpLevel[levelTarget], linearMaxSpeed, 1.5)); //change the 3rd arg to adjust slow down speed, should be >1
             }
-        } while (linear.getPosition() < (dumpLevel[levelTarget]) && !isStopRequested());
+        } while ((linear.getPosition() < (dumpLevel[levelTarget])) && !isStopRequested() && ((System.currentTimeMillis() - startDump) < timeOutDump));
         sleep(250);
         outtake.goToAngle(outtakeDumpPos, 1500);
 
         //carousel staging location
         long startCarouselStage = System.currentTimeMillis();
         long timeOutCarouselStage = 3000;
+        sleep(250);
         do {
             drivePower = fakePid_DrivingEdition(ash, carouselStage, positionTracker, speed, 6, stopTolerance);
             drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
         } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startCarouselStage) < timeOutCarouselStage));
-        sleep(250);
 
         //carousel staging location - spin robot to get ready
         long startCarouselStageSpin = System.currentTimeMillis();

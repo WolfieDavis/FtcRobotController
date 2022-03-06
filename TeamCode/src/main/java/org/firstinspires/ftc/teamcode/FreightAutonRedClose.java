@@ -71,7 +71,7 @@ public class FreightAutonRedClose extends LinearOpMode {
         detectRed = hardwareMap.get(DistanceSensor.class, "detectRed");
 
         // Get the odometry wheels
-        wheelR = new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, (circumference));
+        wheelR = new DcMotorX(hardwareMap.dcMotor.get("odoRear"), ticksPerRev, (circumference));
         wheelL = new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, (-circumference));
         wheelB = new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, -(circumference));
 
@@ -100,7 +100,8 @@ public class FreightAutonRedClose extends LinearOpMode {
         /* ------------ setup movement ------------ */
         //movement parameters
         double exponent = 4; //4 //exponent that the rate curve is raised to
-        double[] speed = {0.4, 0.3, 0.35}; //x, y, phi //.35    //first argument(number) is for straight line movement, second is for turning
+//        double[] speed = {0.4, 0.3, 0.35}; //x, y, phi //.35    //first argument(number) is for straight line movement, second is for turning
+        double[] speed = {0.45, 0.35, 0.35}; //todo: fix this... or leave it??
         double[] detectSpeed = {0.35, 0.2, 0.35};
         double[] stopTolerance = {4, (Math.PI / 45)}; //4 //acceptable tolerance (cm for linear, radians for turning) for the robot to be in a position
 
@@ -108,7 +109,8 @@ public class FreightAutonRedClose extends LinearOpMode {
         double[] drivePower;
 
         //positions: in the format x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
-        double[] carousel = {32.5*side, -23, 0};
+//        double[] carousel = {32.5*side, -23, 0};
+        double[] carousel = {32.5*side, -20.75, 0}; //todo: fine tune this
         double[] ash = {118.5*side, -105, 0}; //-102 for y
         double[] asuPark = {91.75*side, -25, 0}; //89, -25, 0
         double[] detect2 = {53*side, -91-1, 0}; //68.5 too far //location for detecting the top placement
@@ -188,13 +190,15 @@ public class FreightAutonRedClose extends LinearOpMode {
         sleep(500);
 
         //raise and dump
+        long startDump = System.currentTimeMillis();
+        long timeOutDump = 2500;
         do {
             if (levelTarget == 2) {
                 linear.setPower(0.5);
             } else {
-            linear.setVelocity(fakePid(linear, linear.getPosition(), dumpLevel[levelTarget], linearMaxSpeed, 1.5)); //change the 3rd arg to adjust slow down speed, should be >1
+                linear.setVelocity(fakePid(linear, linear.getPosition(), dumpLevel[levelTarget], linearMaxSpeed, 1.5)); //change the 3rd arg to adjust slow down speed, should be >1
             }
-        } while (linear.getPosition() < (dumpLevel[levelTarget]) && !isStopRequested());
+        } while ((linear.getPosition() < (dumpLevel[levelTarget])) && !isStopRequested() && ((System.currentTimeMillis() - startDump) < timeOutDump));
         sleep(250);
         outtake.goToAngle(outtakeDumpPos, 1500);
 

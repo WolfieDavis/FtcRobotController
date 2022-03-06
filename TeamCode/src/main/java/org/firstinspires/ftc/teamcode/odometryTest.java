@@ -26,6 +26,7 @@ import org.firstinspires.ftc.teamcode.api.Odometry;
 public class odometryTest extends OpMode {
 
     DistanceSensor detectRed;
+    DistanceSensor detectBlue;
 //    LynxI2cColorRangeSensor detectL;
 
     private ControlledDrivetrain drivetrain;
@@ -59,7 +60,7 @@ public class odometryTest extends OpMode {
 
         //odometry initialization code
         Odometry positionTracker = new Odometry(
-                new DcMotorX(hardwareMap.dcMotor.get("odoR"), ticksPerRev, (circumference)), //right pod
+                new DcMotorX(hardwareMap.dcMotor.get("odoRear"), ticksPerRev, (circumference)), //right pod
                 new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, (-circumference)), //left pod
                 new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, -(circumference)), //back pod
                 50,
@@ -87,6 +88,7 @@ public class odometryTest extends OpMode {
         /* ------------- define variables to keep track of the controls ------------- */
 
         detectRed = hardwareMap.get(DistanceSensor.class, "detectRed");
+        detectBlue = hardwareMap.get(DistanceSensor.class, "detectBlue");
 //        detectL = hardwareMap.get(LynxI2cColorRangeSensor.class, "detectL");
 
         //joystick values for driving.
@@ -158,7 +160,8 @@ public class odometryTest extends OpMode {
 //        telemetry.addData("tics of rear:", drivetrain.mLB.getPosition());
 //        telemetry.addData("rear cm tics:", drivetrain.mLB.getPosition()*circumference);
 
-        telemetry.addData("distance", detectRed.getDistance(DistanceUnit.CM));
+        telemetry.addData("distance red", detectRed.getDistance(DistanceUnit.CM));
+        telemetry.addData("distance blue", detectBlue.getDistance(DistanceUnit.CM));
 //        telemetry.addData("distance", detectL.getDistance(DistanceUnit.CM));
     }//end of loop
 
