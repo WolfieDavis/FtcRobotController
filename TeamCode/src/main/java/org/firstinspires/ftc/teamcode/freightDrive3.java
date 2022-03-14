@@ -35,6 +35,7 @@ public class freightDrive3 extends OpMode {
 
     private double
             power = 1, //don't know
+            fixLoopContinue = 0,
 
     //various positions the outake arm can be in, in inches from the bottom
     minLinearPos = 0.9525, //0.635 = .25" //0.375 //the btm position of the outake (how far down it will go)
@@ -98,74 +99,96 @@ public class freightDrive3 extends OpMode {
 
     public void start() {
         //            linear.reset(); //TODO: UNCOMMENT WITH LIMIT SWITCH
-        linear.resetEncoder(); //assuming the outake arm is at the btm, set the encoder to 0
         linear.setBrake(true); //so that the outake motor arm will hold pos and won't "bounce"
         linear.controlVelocity();
-
+        drivetrain.stop();
 
         /* ------------------------ lift the odometry pods up ----------------------- */
         odoL.setAngle(180);
         odoR.setAngle(178);
         odoB.setAngle(155);
+
+
     }
 
 
     public void loop() {
 
-        /* ------------- define variables to keep track of the controls ------------- */
+        /* ------------- loop to fix the init position if auton messed up ------------- */
+//        if (fixLoopContinue != 1) {
+////            fixInitLoop();
+//            double maxSpeed = 0.5;
+//            if (Math.abs(gamepad2.right_stick_y) > .1) {
+//                linear.setVelocity(gamepad2.right_stick_y * maxSpeed);
+//            } else {
+//                linear.setVelocity(0.0);
+//            }
+//
+//            if (gamepad2.right_stick_button) {
+//                outtake.setAngle(outtakeTravelPos);
+//            }
+//
+            if (gamepad2.left_stick_button) {
+//                fixLoopContinue = 1;
+                linear.reset(); //assuming the outake arm is at the btm, set the encoder to 0
+//                drivetrain.stop();
+            }
 
-        //joystick values for driving.
-        double leftX = gamepad1.left_stick_x;
-        double rightX = -gamepad1.right_stick_x;
-        double rightY = -gamepad1.right_stick_y; // Reads negative from the controller
+//        } else {
+            /* ------------- define variables to keep track of the controls ------------- */
 
-        //button definitions for gamepad1
-        boolean a1 = gamepad1.a;
-        boolean b1 = gamepad1.b;
-        boolean x1 = gamepad1.x;
-        boolean y1 = gamepad1.y;
-        boolean dpadUp1 = gamepad1.dpad_up;
-        boolean dpadDown1 = gamepad1.dpad_down;
-        boolean dpadRight1 = gamepad1.dpad_right;
-        boolean dpadLeft1 = gamepad1.dpad_left;
-        boolean bumperLeft1 = gamepad1.left_bumper;
-        boolean bumperRight1 = gamepad1.right_bumper;
-        boolean xHit1 = x1 && !lastButtons1.x;
-        boolean yHit1 = y1 && !lastButtons1.y;
-        boolean aHit1 = a1 && !lastButtons1.a;
-        boolean bHit1 = b1 && !lastButtons1.b;
-        boolean dpadUpHit1 = dpadUp1 && !lastDpads1.dpad_up;
-        boolean dpadDownHit1 = dpadDown1 && !lastDpads1.dpad_down;
-        boolean dpadRightHit1 = dpadRight1 && !lastDpads1.dpad_right;
-        boolean dpadLeftHit1 = dpadLeft1 && !lastDpads1.dpad_left;
-        boolean bumperLeftHit1 = bumperLeft1 && !lastBumpers1.left_bumper;
-        boolean bumperRightHit1 = bumperRight1 && !lastBumpers1.right_bumper;
+            //joystick values for driving.
+            double leftX = gamepad1.left_stick_x;
+            double rightX = -gamepad1.right_stick_x;
+            double rightY = -gamepad1.right_stick_y; // Reads negative from the controller
 
-        //button definitions for gamepad2
-        boolean a2 = gamepad2.a;
-        boolean b2 = gamepad2.b;
-        boolean x2 = gamepad2.x;
-        boolean y2 = gamepad2.y;
-        boolean dpadUp2 = gamepad2.dpad_up;
-        boolean dpadDown2 = gamepad2.dpad_down;
-        boolean dpadRight2 = gamepad2.dpad_right;
-        boolean dpadLeft2 = gamepad2.dpad_left;
-        boolean bumperLeft2 = gamepad2.left_bumper;
-        boolean bumperRight2 = gamepad2.right_bumper;
-        boolean xHit2 = x2 && !lastButtons2.x;
-        boolean yHit2 = y2 && !lastButtons2.y;
-        boolean aHit2 = a2 && !lastButtons2.a;
-        boolean bHit2 = b2 && !lastButtons2.b;
-        boolean dpadUpHit2 = dpadUp2 && !lastDpads1.dpad_up;
-        boolean dpadDownHit2 = dpadDown2 && !lastDpads1.dpad_down;
-        boolean dpadRightHit2 = dpadRight2 && !lastDpads1.dpad_right;
-        boolean dpadLeftHit2 = dpadLeft2 && !lastDpads1.dpad_left;
-        boolean bumperLeftHit2 = bumperLeft2 && !lastBumpers2.left_bumper;
-        boolean bumperRightHit2 = bumperRight2 && !lastBumpers2.right_bumper;
+            //button definitions for gamepad1
+            boolean a1 = gamepad1.a;
+            boolean b1 = gamepad1.b;
+            boolean x1 = gamepad1.x;
+            boolean y1 = gamepad1.y;
+            boolean dpadUp1 = gamepad1.dpad_up;
+            boolean dpadDown1 = gamepad1.dpad_down;
+            boolean dpadRight1 = gamepad1.dpad_right;
+            boolean dpadLeft1 = gamepad1.dpad_left;
+            boolean bumperLeft1 = gamepad1.left_bumper;
+            boolean bumperRight1 = gamepad1.right_bumper;
+            boolean xHit1 = x1 && !lastButtons1.x;
+            boolean yHit1 = y1 && !lastButtons1.y;
+            boolean aHit1 = a1 && !lastButtons1.a;
+            boolean bHit1 = b1 && !lastButtons1.b;
+            boolean dpadUpHit1 = dpadUp1 && !lastDpads1.dpad_up;
+            boolean dpadDownHit1 = dpadDown1 && !lastDpads1.dpad_down;
+            boolean dpadRightHit1 = dpadRight1 && !lastDpads1.dpad_right;
+            boolean dpadLeftHit1 = dpadLeft1 && !lastDpads1.dpad_left;
+            boolean bumperLeftHit1 = bumperLeft1 && !lastBumpers1.left_bumper;
+            boolean bumperRightHit1 = bumperRight1 && !lastBumpers1.right_bumper;
+
+            //button definitions for gamepad2
+            boolean a2 = gamepad2.a;
+            boolean b2 = gamepad2.b;
+            boolean x2 = gamepad2.x;
+            boolean y2 = gamepad2.y;
+            boolean dpadUp2 = gamepad2.dpad_up;
+            boolean dpadDown2 = gamepad2.dpad_down;
+            boolean dpadRight2 = gamepad2.dpad_right;
+            boolean dpadLeft2 = gamepad2.dpad_left;
+            boolean bumperLeft2 = gamepad2.left_bumper;
+            boolean bumperRight2 = gamepad2.right_bumper;
+            boolean xHit2 = x2 && !lastButtons2.x;
+            boolean yHit2 = y2 && !lastButtons2.y;
+            boolean aHit2 = a2 && !lastButtons2.a;
+            boolean bHit2 = b2 && !lastButtons2.b;
+            boolean dpadUpHit2 = dpadUp2 && !lastDpads1.dpad_up;
+            boolean dpadDownHit2 = dpadDown2 && !lastDpads1.dpad_down;
+            boolean dpadRightHit2 = dpadRight2 && !lastDpads1.dpad_right;
+            boolean dpadLeftHit2 = dpadLeft2 && !lastDpads1.dpad_left;
+            boolean bumperLeftHit2 = bumperLeft2 && !lastBumpers2.left_bumper;
+            boolean bumperRightHit2 = bumperRight2 && !lastBumpers2.right_bumper;
 
 
 
-        /* --------- reverse the bot if d pad right on controller 1 is pressed --------- */
+            /* --------- reverse the bot if d pad right on controller 1 is pressed --------- */
 //        if(dpadRightHit1){
 //
 //            drivetrain.reverse();
@@ -173,48 +196,48 @@ public class freightDrive3 extends OpMode {
 //        }//reverses the bot
 
 
-        /* ------------- move the outake linear slide ( called "linear") ------------ */
-        // first check if the triggers have been pressed (for manual movement). if they have been and the arm is not at the end of its travel, move the arm at the speed indicated by the trigger.
-        if (gamepad2.right_trigger > 0.01 && linear.getPosition() < maxLinearPos) {
-            // linear.controlVelocity();                       //change to the appropriate control mode
-            linear.setVelocity(gamepad2.right_trigger);    // set the speed of the arm
-            linearGoToPos = -1;                      // cancel any automatic movement
-        } else if (gamepad2.left_trigger > 0.01 && linear.getPosition() > minLinearPos) {
-            // linear.controlVelocity();
-            linear.setVelocity(-gamepad2.left_trigger);
-            linearGoToPos = -1;
-
-            //if there is no manual movement...
-        } else {
-            //check the dpad for automatic movement requests, and record the position requested in the linearGoToPos variable. recording the requested position like this means the driver doesn't have to keep the dpad depressed until the movement is finished, they can just press and release it.
-            if (dpadUpHit2) {
-                linearGoToPos = linearUpPos;
-            } else if (dpadDownHit2) {
-                linearGoToPos = linearDownPos;
-            } else if (dpadLeftHit2) {
-                linearGoToPos = linearMidPos;
-            } else if (dpadRightHit2) {
-                linearGoToPos = linearStagedPos;
-            }
-
-            //if there is automatic movement requested (can be from current iteration OR from past iteration) go to the position
-            if (linearGoToPos != -1) {
-                //linear.controlPosition();
-                //TODO: THIS MIGHT NEED TO HAVE A 2nd ARG of 0.7 or 1 (the speed)
-                // linear.setPosition(linearGoToPos, 0.7); //does this work now if I add a comment
-//                linear.setVelocity(fakePid(linear, linearGoToPos, 0.8, 4, 1.5875)); //0.625 //change the 3rd arg to adjust slow down speed, should be >1
-                linear.setVelocity(fakePid(linear, linear.getPosition(), linearGoToPos, 0.7, 1.7));
-
-                //finally if no manual control was requested AND there is no automatic control, set the velocity to 0
-            } else {
+            /* ------------- move the outake linear slide ( called "linear") ------------ */
+            // first check if the triggers have been pressed (for manual movement). if they have been and the arm is not at the end of its travel, move the arm at the speed indicated by the trigger.
+            if (gamepad2.right_trigger > 0.01 && linear.getPosition() < maxLinearPos) {
+                // linear.controlVelocity();                       //change to the appropriate control mode
+                linear.setVelocity(gamepad2.right_trigger);    // set the speed of the arm
+                linearGoToPos = -1;                      // cancel any automatic movement
+            } else if (gamepad2.left_trigger > 0.01 && linear.getPosition() > minLinearPos) {
                 // linear.controlVelocity();
-                linear.setVelocity(0.0);
+                linear.setVelocity(-gamepad2.left_trigger);
+                linearGoToPos = -1;
+
+                //if there is no manual movement...
+            } else {
+                //check the dpad for automatic movement requests, and record the position requested in the linearGoToPos variable. recording the requested position like this means the driver doesn't have to keep the dpad depressed until the movement is finished, they can just press and release it.
+                if (dpadUpHit2) {
+                    linearGoToPos = linearUpPos;
+                } else if (dpadDownHit2) {
+                    linearGoToPos = linearDownPos;
+                } else if (dpadLeftHit2) {
+                    linearGoToPos = linearMidPos;
+                } else if (dpadRightHit2) {
+                    linearGoToPos = linearStagedPos;
+                }
+
+                //if there is automatic movement requested (can be from current iteration OR from past iteration) go to the position
+                if (linearGoToPos != -1) {
+                    //linear.controlPosition();
+                    //TODO: THIS MIGHT NEED TO HAVE A 2nd ARG of 0.7 or 1 (the speed)
+                    // linear.setPosition(linearGoToPos, 0.7); //does this work now if I add a comment
+//                linear.setVelocity(fakePid(linear, linearGoToPos, 0.8, 4, 1.5875)); //0.625 //change the 3rd arg to adjust slow down speed, should be >1
+                    linear.setVelocity(fakePid(linear, linear.getPosition(), linearGoToPos, 0.7, 1.7));
+
+                    //finally if no manual control was requested AND there is no automatic control, set the velocity to 0
+                } else {
+                    // linear.controlVelocity();
+                    linear.setVelocity(0.0);
+                }
             }
-        }
 
 
 
-        /* ------------------------- set the bucket position ------------------------ */
+            /* ------------------------- set the bucket position ------------------------ */
 //        if (y1||y2){ // if a "dump"  has been requested
 //            outtake.setAngle(outtakeDumpPos);
 //
@@ -227,93 +250,99 @@ public class freightDrive3 extends OpMode {
 //            outtake.setAngle(outtakeCollectPos);
 //        }
 
-        /* ----------------- set the bucket position w/ compound ---------------- */
-        if (x2 && (linear.getPosition() > 13.25)) {
-            outtake.setAngle(160);
-            tip.setAngle(2);
-        } else if (a2 && (linear.getPosition() > 13.25)) {
-            outtake.setAngle(160);
-            tip.setAngle(180);
-        } else {
-            tip.setAngle(87); //90 but moved to avoid hitting the wire
-            if ((y1 || y2) && (linear.getPosition() > 9)) { // if a "dump"  has been requested
-                outtake.setAngle(outtakeDumpPos);
-
-                //if the bucket is in the upper section of the arm (traveling or dumping position) tip it back a little to keep stuff from falling out
-            } else if (linear.getPosition() > outtakeLinearTrip) {
-                outtake.setAngle(outtakeTravelPos);
-
-                //if the bucket is in the lower section of the arm tip it down to the collecting position
+            /* ----------------- set the bucket position w/ compound ---------------- */
+            if (x2 && (linear.getPosition() > 13.25)) {
+                outtake.setAngle(160);
+                tip.setAngle(2);
+            } else if (a2 && (linear.getPosition() > 13.25)) {
+                outtake.setAngle(160);
+                tip.setAngle(180);
             } else {
-                outtake.setAngle(outtakeCollectPos);
+                tip.setAngle(87); //90 but moved to avoid hitting the wire
+                if ((y1 || y2) && (linear.getPosition() > 9)) { // if a "dump"  has been requested
+                    outtake.setAngle(outtakeDumpPos);
+
+                    //if the bucket is in the upper section of the arm (traveling or dumping position) tip it back a little to keep stuff from falling out
+                } else if (linear.getPosition() > outtakeLinearTrip) {
+                    outtake.setAngle(outtakeTravelPos);
+
+                    //if the bucket is in the lower section of the arm tip it down to the collecting position
+                } else {
+                    outtake.setAngle(outtakeCollectPos);
+                }
             }
-        }
 
 
-        /* ------------------------ odometry pods up and down ----------------------- */
+            /* ------------------------ odometry pods up and down ----------------------- */
 
-        if (dpadUpHit1) { //up
-            odoL.setAngle(180);
-            odoR.setAngle(178);
-            odoB.setAngle(155);
-        } else if (dpadDownHit1) { //down
-            odoL.setAngle(0);
-            odoR.setAngle(0);
-            odoB.setAngle(0);
-        }
+            if (dpadUpHit1) { //up
+                odoL.setAngle(180);
+                odoR.setAngle(178);
+                odoB.setAngle(155);
+            } else if (dpadDownHit1) { //down
+                odoL.setAngle(0);
+                odoR.setAngle(0);
+                odoB.setAngle(0);
+            }
 
-        /* -------------- set the intake spinner direction / on / off -------------- */
-        intakeSpinDir = (bumperRightHit1 || bumperRightHit2) ? intakeSpinDir *= -1 : intakeSpinDir;//toggles intake direction
-        //intake spinner is toggled if b is pressed
-        if (bHit1 || bHit2) {
-            intakeToggle *= -1;
-            switch (intakeToggle) {
-                case -1:
-                    intake.setPower(1 * intakeSpinDir);
-                    break;
-                case 1:
-                    intake.setPower(0.0);
-                    break;
-            }//end of switch case
-        }
-
-
-        /* -------------- set the carousel spinner direction / on / off ------------- */
-        spinDirection = (bumperLeftHit1 || bumperLeftHit2) ? spinDirection *= -1 : spinDirection; //reverse the direction if left bumper  is pressed
-        //carousel spinner triggered w/ a press
-        if (a1) {
-            spinner.setPower(-0.8 * spinDirection);
-        } else {
-            spinner.setPower(0);
-        }
+            /* -------------- set the intake spinner direction / on / off -------------- */
+            intakeSpinDir = (bumperRightHit1 || bumperRightHit2) ? intakeSpinDir *= -1 : intakeSpinDir;//toggles intake direction
+            //intake spinner is toggled if b is pressed
+            if (bHit1 || bHit2) {
+                intakeToggle *= -1;
+                switch (intakeToggle) {
+                    case -1:
+                        intake.setPower(1 * intakeSpinDir);
+                        break;
+                    case 1:
+                        intake.setPower(0.0);
+                        break;
+                }//end of switch case
+            }
 
 
-        /* ------------------------- control the drivetrain ------------------------- */
-        // Drive the robot with joysticks if they are moved (with rates)
-        if (Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
-            double multiplier = (isReversed) ? -1 : 1;
-            drivetrain.driveWithGamepad(0.8, rateCurve(-rightY, 1.7), rateCurve(-leftX, 1.7) * multiplier * 0.625, rateCurve(rightX, 1.7)); //curved stick rates
-        } else {
-            // If the joysticks are not pressed, do not move the bot
-            drivetrain.stop();
-        }
+            /* -------------- set the carousel spinner direction / on / off ------------- */
+            spinDirection = (bumperLeftHit1 || bumperLeftHit2) ? spinDirection *= -1 : spinDirection; //reverse the direction if left bumper  is pressed
+            //carousel spinner triggered w/ a press
+            if (a1) {
+                spinner.setPower(-0.8 * spinDirection);
+            } else {
+                spinner.setPower(0);
+            }
 
 
-        /* ------------- record button states, to be used in determining ------------ */
-        /* ------------------- "pressed" vs "held" and "released" ------------------- */
-        // Save button states
-        lastButtons1.update(a1, b1, x1, y1);
-        lastDpads1.update(dpadUp1, dpadDown1, dpadRight1, dpadLeft1);
-        lastBumpers1.update(bumperRight1, bumperLeft1);
+            /* ------------------------- control the drivetrain ------------------------- */
+            // Drive the robot with joysticks if they are moved (with rates)
+            if (Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
+                double multiplier = (isReversed) ? -1 : 1;
+                drivetrain.driveWithGamepad(0.8, rateCurve(-rightY, 1.7), rateCurve(-leftX, 1.7) * multiplier * 0.625, rateCurve(rightX, 1.7)); //curved stick rates
+            } else {
+                // If the joysticks are not pressed, do not move the bot
+                drivetrain.stop();
+            }
 
-        lastButtons2.update(a2, b2, x2, y2);
-        lastDpads2.update(dpadUp2, dpadDown2, dpadRight2, dpadLeft2);
-        lastBumpers2.update(bumperRight2, bumperLeft2);
 
-        /* ------- print to telemetry (used for calibration/ trouble shooting) ------ */
+            /* ------------- record button states, to be used in determining ------------ */
+            /* ------------------- "pressed" vs "held" and "released" ------------------- */
+            // Save button states
+            lastButtons1.update(a1, b1, x1, y1);
+            lastDpads1.update(dpadUp1, dpadDown1, dpadRight1, dpadLeft1);
+            lastBumpers1.update(bumperRight1, bumperLeft1);
 
-        telemetry.addData("Data:", linear.getPosition());
-        // telemetry.addData("Dpad up: ", dpadUp2);
+            lastButtons2.update(a2, b2, x2, y2);
+            lastDpads2.update(dpadUp2, dpadDown2, dpadRight2, dpadLeft2);
+            lastBumpers2.update(bumperRight2, bumperLeft2);
+
+            /* ------- print to telemetry (used for calibration/ trouble shooting) ------ */
+
+            telemetry.addData("Data:", linear.getPosition());
+            // telemetry.addData("Dpad up: ", dpadUp2);
+
+
+
+//        } //end of fix itself code if used
+
+
 
     }//end of loop
 
@@ -336,7 +365,7 @@ public class freightDrive3 extends OpMode {
         else exponent = 6;
 
         double negAdjust;
-        if ((totalMoveDist > 0) && ((currentPos - startPos) < 2)) negAdjust = (totalMoveDist-1);
+        if ((totalMoveDist > 0) && ((currentPos - startPos) < 2)) negAdjust = (totalMoveDist - 1);
         else negAdjust = 0;
 
         double distanceRemaining = Math.abs(targetPos - currentPos);
@@ -360,7 +389,32 @@ public class freightDrive3 extends OpMode {
 //    }
 
 
+//    private void fixInitLoop() {
+//
+//        double maxSpeed = 0.5;
+//        if (Math.abs(gamepad2.right_stick_y) > .1) {
+//            linear.setVelocity(gamepad2.right_stick_y * maxSpeed);
+//        } else {
+//            linear.setVelocity(0.0);
+//        }
+//
+//        if (gamepad2.right_stick_button) {
+//            outtake.setAngle(outtakeTravelPos);
+//        }
+//
+//        if (gamepad2.left_stick_button) {
+//            fixLoopContinue = 1;
+//            linear.resetEncoder(); //assuming the outake arm is at the btm, set the encoder to 0
+//        }
+//
+//    }
+
+
 }
+
+
+
+
    /*
     RRRRR           b            hh                                k     k          5555555 77777777 44    44  1111
    R::::::R        b.b           h.h                              k.k   kk          5.5          7.7 4.4  4.4 1 1.1

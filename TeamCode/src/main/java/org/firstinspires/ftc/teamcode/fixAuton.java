@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.api.State;
  * ruined by: Cailean Sorce
  */
 
-@TeleOp
+//@TeleOp
 public class fixAuton extends OpMode {
 
 

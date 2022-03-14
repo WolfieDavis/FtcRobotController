@@ -13,8 +13,8 @@ import org.firstinspires.ftc.teamcode.api.ServoX;
 
 import java.util.Arrays;
 
-@Autonomous
-public class FreightAutonBlueClose extends LinearOpMode {
+//@Autonomous
+public class FreightAutonBlueClose2 extends LinearOpMode {
 
     int side = -1; //modifier for x coordinates: set to 1 for red, or -1 for blue
     //todo: also remember to swap distance sensor to detectBlue for blue or detectRed for red
@@ -63,7 +63,6 @@ public class FreightAutonBlueClose extends LinearOpMode {
         linear = new LimitedMotorX(hardwareMap.dcMotor.get("linear"), 1607, 34.76625);
 
         outtake = new ServoX(hardwareMap.servo.get("outtake"));
-
         //servos to raise and lower the odometry pods
         odoL = new ServoX(hardwareMap.servo.get("odoL"));
         odoR = new ServoX(hardwareMap.servo.get("odoR"));
@@ -95,7 +94,7 @@ public class FreightAutonBlueClose extends LinearOpMode {
 
         telemetry.addData("Done initializing", "");
         telemetry.update();
-//        linear.reset();
+        linear.reset();
 
         /* ----------- waiting for start ----------- */
 //        linear.resetEncoder();
@@ -141,8 +140,6 @@ public class FreightAutonBlueClose extends LinearOpMode {
         double outtakeTravelPos = 137.5; //servo position for travel
         double outtakeDumpPos = 85; //servo position for dump
         double outtakeCollectPos = 180;
-
-
 
         /* --------------- move robot --------------- */
         //tilt bucket up and drop odometry pods

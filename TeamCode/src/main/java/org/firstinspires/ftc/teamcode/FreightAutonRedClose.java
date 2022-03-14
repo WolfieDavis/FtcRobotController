@@ -110,7 +110,7 @@ public class FreightAutonRedClose extends LinearOpMode {
 
         //positions: in the format x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
 //        double[] carousel = {32.5*side, -23, 0};
-        double[] carousel = {32.5*side, -20.75, 0}; //todo: fine tune this
+        double[] carousel = {32.5-0.75, -20.75, 0}; //todo: fine tune this
         double[] ash = {118.5*side, -105, 0}; //-102 for y
         double[] asuPark = {91.75*side, -25, 0}; //89, -25, 0
         double[] detect2 = {53*side, -91-1, 0}; //68.5 too far //location for detecting the top placement
