@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.api.DcMotorX;
 import org.firstinspires.ftc.teamcode.api.Drivetrain;
 import org.firstinspires.ftc.teamcode.api.ServoX;
 
-//@Autonomous
+@Autonomous
 public class jvAuton extends LinearOpMode {
 
     private Drivetrain drivetrain;
@@ -39,11 +39,11 @@ public class jvAuton extends LinearOpMode {
 
 //        Automation
         long startDriveForward = System.currentTimeMillis();
-        while(System.currentTimeMillis() - startDriveForward < 500 && !isStopRequested()){
+        while(System.currentTimeMillis() - startDriveForward < 1500 && !isStopRequested()){
 
             /* ---- Code in simple language drivetrain.drive(0.5, Drivetrain.Direction.BACKWARD); moves robot for 1500 mili seconds ----*/
 
-            drivetrain.drive(0.5, Drivetrain.Direction.FORWARD);
+            drivetrain.drive(0.5, Drivetrain.Direction.LEFT);
 
         }
         //Sets down the box to push stuff

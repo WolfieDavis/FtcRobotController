@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.api.Odometry;
 import org.firstinspires.ftc.teamcode.api.ServoX;
 import org.firstinspires.ftc.teamcode.api.State;
 
-//@TeleOp
+@TeleOp
 public class jvDrive extends OpMode {
 
 
@@ -60,7 +60,7 @@ public class jvDrive extends OpMode {
 
         // Drive the robot with joysticks if they are moved (with rates)
         if (Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
-            drivetrain.driveWithGamepad(0.8, rightY, leftX, rightX);
+            drivetrain.driveWithGamepad(0.6, rightY, leftX, rightX);
 //            drivetrain.driveWithGamepad(1, rateCurve(rightY, 1.7), rateCurve(leftX, 1.7)/* 0.5*leftX */, rateCurve(rightX, 1.7)); //curved stick rates
         } else {
             // If the joysticks are not pressed, do not move the bot

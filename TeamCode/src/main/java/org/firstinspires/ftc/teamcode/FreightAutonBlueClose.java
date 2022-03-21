@@ -206,6 +206,11 @@ public class FreightAutonBlueClose extends LinearOpMode {
         } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startASH) < timeOutASH));
         sleep(500);
 
+
+        //reset linear slide encoder
+//        linear.resetEncoder();
+
+
         //raise and dump
         long startDump = System.currentTimeMillis();
         long timeOutDump = 2500;
@@ -274,6 +279,7 @@ public class FreightAutonBlueClose extends LinearOpMode {
         /* ---------------- shut down ---------------- */
         drivetrain.setBrake(true);
         drivetrain.stop();
+        positionTracker.stop();
     }//end of runOpMode
 
 

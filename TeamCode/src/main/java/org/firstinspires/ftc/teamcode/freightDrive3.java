@@ -128,11 +128,11 @@ public class freightDrive3 extends OpMode {
 //                outtake.setAngle(outtakeTravelPos);
 //            }
 //
-            if (gamepad2.left_stick_button) {
-//                fixLoopContinue = 1;
-                linear.reset(); //assuming the outake arm is at the btm, set the encoder to 0
-//                drivetrain.stop();
-            }
+//            if (gamepad2.left_stick_button) {
+////                fixLoopContinue = 1;
+//                linear.reset(); //assuming the outake arm is at the btm, set the encoder to 0
+////                drivetrain.stop();
+//            }
 
 //        } else {
             /* ------------- define variables to keep track of the controls ------------- */
@@ -262,11 +262,11 @@ public class freightDrive3 extends OpMode {
                 if ((y1 || y2) && (linear.getPosition() > 9)) { // if a "dump"  has been requested
                     outtake.setAngle(outtakeDumpPos);
 
-                    //if the bucket is in the upper section of the arm (traveling or dumping position) tip it back a little to keep stuff from falling out
+                    //if the bucket is in the upper section of the arm
                 } else if (linear.getPosition() > outtakeLinearTrip) {
                     outtake.setAngle(outtakeTravelPos);
 
-                    //if the bucket is in the lower section of the arm tip it down to the collecting position
+                    //if the bucket is in the lower section of the arm tip it down
                 } else {
                     outtake.setAngle(outtakeCollectPos);
                 }
