@@ -280,6 +280,7 @@ public class FreightAutonBlueClose extends LinearOpMode {
         drivetrain.setBrake(true);
         drivetrain.stop();
         positionTracker.stop();
+//        drivetrain.stopController();
     }//end of runOpMode
 
 
