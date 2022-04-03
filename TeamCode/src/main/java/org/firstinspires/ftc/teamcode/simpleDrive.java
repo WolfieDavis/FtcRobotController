@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.api.State;
  */
 
 @TeleOp
-public class freightDrive3 extends OpMode {
+public class simpleDrive extends OpMode {
 
 
     private Drivetrain drivetrain;
@@ -100,24 +100,24 @@ public class freightDrive3 extends OpMode {
         drivetrain = new Drivetrain(mRF, mLF, mRB, mLB);
         drivetrain.reverse();
 
-        linear = new LimitedMotorX(hardwareMap.dcMotor.get("linear"), 1607, 34.76625);//13.6875); //1968, 16.25 bigger pulley   // 2900, 16.25 motor for linear rail
-        intake = new DcMotorX(hardwareMap.dcMotor.get("intake"));//motor for intake spinner
+//        linear = new LimitedMotorX(hardwareMap.dcMotor.get("linear"), 1607, 34.76625);//13.6875); //1968, 16.25 bigger pulley   // 2900, 16.25 motor for linear rail
+//        intake = new DcMotorX(hardwareMap.dcMotor.get("intake"));//motor for intake spinner
         spinner = new DcMotorX(hardwareMap.dcMotor.get("spinner"));//motor for carousel spinner
-        tapeExtend = new DcMotorX(hardwareMap.dcMotor.get("odoRear"));
-        outtake = new ServoX(hardwareMap.servo.get("outtake"));//servo for outtake dropper
-        tip = new ServoX(hardwareMap.servo.get("tip"));
-        odoL = new ServoX(hardwareMap.servo.get("odoL"));
-        odoR = new ServoX(hardwareMap.servo.get("odoR"));
-        odoB = new ServoX(hardwareMap.servo.get("odoB"));
-        tapePan = new ServoX(hardwareMap.servo.get("tapePan"), 180, panMax, panMin);
-        tapeTilt = new ServoX(hardwareMap.servo.get("tapeTilt"), 180, tiltMax, tiltMin);
-//            linear.setLimits(hardwareMap.touchSensor.get("linearBtmLimit"), 12.0); //UNCOMMENT WITH LIMIT SWITCH
-        //tip.setAngle(90);
-
-        bottom = hardwareMap.touchSensor.get("bottom");
-//        low = hardwareMap.touchSensor.get("low");
-//        middle = hardwareMap.touchSensor.get("middle");
-        top = hardwareMap.touchSensor.get("top");
+//        tapeExtend = new DcMotorX(hardwareMap.dcMotor.get("odoRear"));
+//        outtake = new ServoX(hardwareMap.servo.get("outtake"));//servo for outtake dropper
+//        tip = new ServoX(hardwareMap.servo.get("tip"));
+//        odoL = new ServoX(hardwareMap.servo.get("odoL"));
+//        odoR = new ServoX(hardwareMap.servo.get("odoR"));
+//        odoB = new ServoX(hardwareMap.servo.get("odoB"));
+//        tapePan = new ServoX(hardwareMap.servo.get("tapePan"), 180, panMax, panMin);
+//        tapeTilt = new ServoX(hardwareMap.servo.get("tapeTilt"), 180, tiltMax, tiltMin);
+////            linear.setLimits(hardwareMap.touchSensor.get("linearBtmLimit"), 12.0); //UNCOMMENT WITH LIMIT SWITCH
+//        //tip.setAngle(90);
+//
+//        bottom = hardwareMap.touchSensor.get("bottom");
+////        low = hardwareMap.touchSensor.get("low");
+////        middle = hardwareMap.touchSensor.get("middle");
+//        top = hardwareMap.touchSensor.get("top");
 
         drivetrain.setBrake(true);
         drivetrain.stop();
@@ -126,14 +126,14 @@ public class freightDrive3 extends OpMode {
 
     public void start() {
         //            linear.reset(); //TODO: UNCOMMENT WITH LIMIT SWITCH
-        linear.setBrake(true); //so that the outake motor arm will hold pos and won't "bounce"
-        linear.controlVelocity();
+//        linear.setBrake(true); //so that the outake motor arm will hold pos and won't "bounce"
+//        linear.controlVelocity();
         drivetrain.stop();
 
-        /* ------------------------ lift the odometry pods up ----------------------- */
-        odoL.setAngle(180);
-        odoR.setAngle(178);
-        odoB.setAngle(155);
+//        /* ------------------------ lift the odometry pods up ----------------------- */
+//        odoL.setAngle(180);
+//        odoR.setAngle(178);
+//        odoB.setAngle(155);
 
     }
 
@@ -221,143 +221,143 @@ public class freightDrive3 extends OpMode {
 //            isReversed = !isReversed;
 //        }//reverses the bot
 
-
-        if (bottom.isPressed()) linOffset = linear.getPosition();
-
-        /* ------------- move the outake linear slide ( called "linear") ------------ */
-        // first check if the triggers have been pressed (for manual movement). if they have been and the arm is not at the end of its travel, move the arm at the speed indicated by the trigger.
-        if (gamepad2.right_trigger > 0.01 && linear.getPosition() < maxLinearPos && !top.isPressed()) {
-            // linear.controlVelocity();                       //change to the appropriate control mode
-            linear.setVelocity(gamepad2.right_trigger * linearMaxSpeed);    // set the speed of the arm
-            linearGoToPos = -1;                      // cancel any automatic movement
-        } else if (gamepad2.left_trigger > 0.01 && linear.getPosition() > minLinearPos && !bottom.isPressed()) {
-            // linear.controlVelocity();
-            linear.setVelocity(-gamepad2.left_trigger * linearMaxSpeed);
-            linearGoToPos = -1;
-
-            //if there is no manual movement...
-        } else {
-            //check the dpad for automatic movement requests, and record the position requested in the linearGoToPos variable. recording the requested position like this means the driver doesn't have to keep the dpad depressed until the movement is finished, they can just press and release it.
-
-//            if (dpadUpHit2) {
-//                linearGoToPos = linearUpPos;
-//            } else if (dpadDownHit2) {
-//                linearGoToPos = linearDownPos;
-//            } else if (dpadLeftHit2) {
-//                linearGoToPos = linearMidPos;
-//            } else if (dpadRightHit2) {
-//                linearGoToPos = linearStagedPos;
-//            }
-
-            //if there is automatic movement requested (can be from current iteration OR from past iteration) go to the position
-            if (linearGoToPos != -1) {
-                //linear.controlPosition();
-                //TODO: THIS MIGHT NEED TO HAVE A 2nd ARG of 0.7 or 1 (the speed)
-                // linear.setPosition(linearGoToPos, 0.7); //does this work now if I add a comment
-//                linear.setVelocity(fakePid(linear, linearGoToPos, 0.8, 4, 1.5875)); //0.625 //change the 3rd arg to adjust slow down speed, should be >1
-                linear.setVelocity(fakePid(linear, linear.getPosition(), linearGoToPos, 0.2, 1.7));
-                //0.7
-                //finally if no manual control was requested AND there is no automatic control, set the velocity to 0
-            } else {
-                // linear.controlVelocity();
-                linear.setVelocity(0.0);
-            }
-        }
-
-
-        /* ------------------------- set the bucket position ------------------------ */
-//        if (y1||y2){ // if a "dump"  has been requested
-//            outtake.setAngle(outtakeDumpPos);
 //
-//        //if the bucket is in the upper section of the arm (traveling or dumping position) tip it back a little to keep stuff from falling out
-//        } else if ((linear.getPosition() > outtakeLinearTrip) &&! (x2||a2)){
-//            outtake.setAngle(outtakeTravelPos);
+//        if (bottom.isPressed()) linOffset = linear.getPosition();
 //
-//        //if the bucket is in the lower section of the arm tip it down to the collecting position
+//        /* ------------- move the outake linear slide ( called "linear") ------------ */
+//        // first check if the triggers have been pressed (for manual movement). if they have been and the arm is not at the end of its travel, move the arm at the speed indicated by the trigger.
+//        if (gamepad2.right_trigger > 0.01 && linear.getPosition() < maxLinearPos && !top.isPressed()) {
+//            // linear.controlVelocity();                       //change to the appropriate control mode
+//            linear.setVelocity(gamepad2.right_trigger * linearMaxSpeed);    // set the speed of the arm
+//            linearGoToPos = -1;                      // cancel any automatic movement
+//        } else if (gamepad2.left_trigger > 0.01 && linear.getPosition() > minLinearPos && !bottom.isPressed()) {
+//            // linear.controlVelocity();
+//            linear.setVelocity(-gamepad2.left_trigger * linearMaxSpeed);
+//            linearGoToPos = -1;
+//
+//            //if there is no manual movement...
 //        } else {
-//            outtake.setAngle(outtakeCollectPos);
-//        }
-
-
-        /* ----------------- set the bucket position w/ compound ---------------- */
-        if (x2 && (linear.getPosition() > 13.25)) {
-            outtake.setAngle(160);
-            tip.setAngle(2);
-        } else if (a2 && (linear.getPosition() > 13.25)) {
-            outtake.setAngle(160);
-            tip.setAngle(180);
-        } else {
-            tip.setAngle(87); //90 but moved to avoid hitting the wire
-            if ((y1 || y2) && (linear.getPosition() > 9)) { // if a "dump"  has been requested
-                outtake.setAngle(outtakeDumpPos);
-
-                //if the bucket is in the upper section of the arm
-            } else if (linear.getPosition() > outtakeLinearTrip) {
-                outtake.setAngle(outtakeTravelPos);
-
-                //if the bucket is in the lower section of the arm tip it down
-            } else {
-                outtake.setAngle(outtakeCollectPos);
-            }
-        }
-
-
-
-
-        /* ------------------------ tape measure pan/tile/extend ----------------------- */
-        if (Math.abs(gamepad2.left_stick_y) > .1)
-            tapeExtend.setPower(gamepad2.left_stick_y * tapeExtendPower);
-        else tapeExtend.setPower(0);
-
-        if (Math.abs(gamepad2.right_stick_x) > .1 || Math.abs(gamepad2.right_stick_y) > .1) {
-            tapePanValue += gamepad2.right_stick_x * tapePanMultiplier;
-            tapeTiltValue += gamepad2.right_stick_y * -tapeTiltMultiplier;
-        }
-
-//        if (Math.abs(gamepad2.right_stick_x) > .1 && tapePanValue < panMax && tapePanValue > panMin) {
-//                tapePanValue += gamepad2.right_stick_x * tapePanMultiplier;
+//            //check the dpad for automatic movement requests, and record the position requested in the linearGoToPos variable. recording the requested position like this means the driver doesn't have to keep the dpad depressed until the movement is finished, they can just press and release it.
+//
+////            if (dpadUpHit2) {
+////                linearGoToPos = linearUpPos;
+////            } else if (dpadDownHit2) {
+////                linearGoToPos = linearDownPos;
+////            } else if (dpadLeftHit2) {
+////                linearGoToPos = linearMidPos;
+////            } else if (dpadRightHit2) {
+////                linearGoToPos = linearStagedPos;
+////            }
+//
+//            //if there is automatic movement requested (can be from current iteration OR from past iteration) go to the position
+//            if (linearGoToPos != -1) {
+//                //linear.controlPosition();
+//                //TODO: THIS MIGHT NEED TO HAVE A 2nd ARG of 0.7 or 1 (the speed)
+//                // linear.setPosition(linearGoToPos, 0.7); //does this work now if I add a comment
+////                linear.setVelocity(fakePid(linear, linearGoToPos, 0.8, 4, 1.5875)); //0.625 //change the 3rd arg to adjust slow down speed, should be >1
+//                linear.setVelocity(fakePid(linear, linear.getPosition(), linearGoToPos, 0.2, 1.7));
+//                //0.7
+//                //finally if no manual control was requested AND there is no automatic control, set the velocity to 0
+//            } else {
+//                // linear.controlVelocity();
+//                linear.setVelocity(0.0);
+//            }
 //        }
 //
-//        if (Math.abs(gamepad2.right_stick_y) > .1 && tapeTiltValue < tiltMax && tapeTiltValue > tiltMin) {
-//                tapeTiltValue += gamepad2.right_stick_y * -tapeTiltMultiplier;
+//
+//        /* ------------------------- set the bucket position ------------------------ */
+////        if (y1||y2){ // if a "dump"  has been requested
+////            outtake.setAngle(outtakeDumpPos);
+////
+////        //if the bucket is in the upper section of the arm (traveling or dumping position) tip it back a little to keep stuff from falling out
+////        } else if ((linear.getPosition() > outtakeLinearTrip) &&! (x2||a2)){
+////            outtake.setAngle(outtakeTravelPos);
+////
+////        //if the bucket is in the lower section of the arm tip it down to the collecting position
+////        } else {
+////            outtake.setAngle(outtakeCollectPos);
+////        }
+//
+//
+//        /* ----------------- set the bucket position w/ compound ---------------- */
+//        if (x2 && (linear.getPosition() > 13.25)) {
+//            outtake.setAngle(160);
+//            tip.setAngle(2);
+//        } else if (a2 && (linear.getPosition() > 13.25)) {
+//            outtake.setAngle(160);
+//            tip.setAngle(180);
+//        } else {
+//            tip.setAngle(87); //90 but moved to avoid hitting the wire
+//            if ((y1 || y2) && (linear.getPosition() > 9)) { // if a "dump"  has been requested
+//                outtake.setAngle(outtakeDumpPos);
+//
+//                //if the bucket is in the upper section of the arm
+//            } else if (linear.getPosition() > outtakeLinearTrip) {
+//                outtake.setAngle(outtakeTravelPos);
+//
+//                //if the bucket is in the lower section of the arm tip it down
+//            } else {
+//                outtake.setAngle(outtakeCollectPos);
+//            }
 //        }
-
-        tapePan.setAngle(tapePanValue);
-        tapeTilt.setAngle(tapeTiltValue);
-
-//        telemetry.addData("pan", tapePanValue);
-//        telemetry.addData("tilt", tapeTiltValue);
-//        telemetry.update();
-
-
-        /* ------------------------ odometry pods up and down ----------------------- */
-
-        if (dpadUpHit1) { //up
-            odoL.setAngle(180);
-            odoR.setAngle(178);
-            odoB.setAngle(155);
-        } else if (dpadDownHit1) { //down
-            odoL.setAngle(0);
-            odoR.setAngle(0);
-            odoB.setAngle(0);
-        }
-
-        /* -------------- set the intake spinner direction / on / off -------------- */
-        intakeSpinDir = (bumperRightHit1 || bumperRightHit2) ? intakeSpinDir *= -1 : intakeSpinDir;//toggles intake direction
-        //intake spinner is toggled if b is pressed
-        if (bHit1 || bHit2) {
-            intakeToggle *= -1;
-            switch (intakeToggle) {
-                case -1:
-                    intake.setPower(1 * intakeSpinDir);
-                    break;
-                case 1:
-                    intake.setPower(0.0);
-                    break;
-            }//end of switch case
-        }
-
-
+//
+//
+//
+//
+//        /* ------------------------ tape measure pan/tile/extend ----------------------- */
+//        if (Math.abs(gamepad2.left_stick_y) > .1)
+//            tapeExtend.setPower(gamepad2.left_stick_y * tapeExtendPower);
+//        else tapeExtend.setPower(0);
+//
+//        if (Math.abs(gamepad2.right_stick_x) > .1 || Math.abs(gamepad2.right_stick_y) > .1) {
+//            tapePanValue += gamepad2.right_stick_x * tapePanMultiplier;
+//            tapeTiltValue += gamepad2.right_stick_y * -tapeTiltMultiplier;
+//        }
+//
+////        if (Math.abs(gamepad2.right_stick_x) > .1 && tapePanValue < panMax && tapePanValue > panMin) {
+////                tapePanValue += gamepad2.right_stick_x * tapePanMultiplier;
+////        }
+////
+////        if (Math.abs(gamepad2.right_stick_y) > .1 && tapeTiltValue < tiltMax && tapeTiltValue > tiltMin) {
+////                tapeTiltValue += gamepad2.right_stick_y * -tapeTiltMultiplier;
+////        }
+//
+//        tapePan.setAngle(tapePanValue);
+//        tapeTilt.setAngle(tapeTiltValue);
+//
+////        telemetry.addData("pan", tapePanValue);
+////        telemetry.addData("tilt", tapeTiltValue);
+////        telemetry.update();
+//
+//
+//        /* ------------------------ odometry pods up and down ----------------------- */
+//
+//        if (dpadUpHit1) { //up
+//            odoL.setAngle(180);
+//            odoR.setAngle(178);
+//            odoB.setAngle(155);
+//        } else if (dpadDownHit1) { //down
+//            odoL.setAngle(0);
+//            odoR.setAngle(0);
+//            odoB.setAngle(0);
+//        }
+//
+//        /* -------------- set the intake spinner direction / on / off -------------- */
+//        intakeSpinDir = (bumperRightHit1 || bumperRightHit2) ? intakeSpinDir *= -1 : intakeSpinDir;//toggles intake direction
+//        //intake spinner is toggled if b is pressed
+//        if (bHit1 || bHit2) {
+//            intakeToggle *= -1;
+//            switch (intakeToggle) {
+//                case -1:
+//                    intake.setPower(1 * intakeSpinDir);
+//                    break;
+//                case 1:
+//                    intake.setPower(0.0);
+//                    break;
+//            }//end of switch case
+//        }
+//
+//
         /* -------------- set the carousel spinner direction / on / off ------------- */
         spinDirection = (bumperLeftHit1 || bumperLeftHit2) ? spinDirection *= -1 : spinDirection; //reverse the direction if left bumper  is pressed
         //carousel spinner triggered w/ a press
@@ -392,8 +392,8 @@ public class freightDrive3 extends OpMode {
         lastBumpers2.update(bumperRight2, bumperLeft2);
 
         /* ------- print to telemetry (used for calibration/ trouble shooting) ------ */
-
-        telemetry.addData("Data:", linear.getPosition());
+//
+//        telemetry.addData("Data:", linear.getPosition());
 
 //        telemetry.addData()
 //         telemetry.addData("Dpad up: ", dpadUp2);
@@ -409,32 +409,32 @@ public class freightDrive3 extends OpMode {
         return Math.pow(Math.abs(input), rate) * ((input > 0) ? 1 : -1);
     }
 
-    /* ---------- used to slow a motor down when approching target pos ---------- */
-    /* ------------- returns (distance left to travel)^(1/adjuster) ------------- */
-    private double fakePid(DcMotorX motor, double startPos, double targetPos, double speed, /*double exponent, /*double adjuster,*/ double stopTolerance) {
-        double currentPos = motor.getPosition();
-        double totalMoveDist = (targetPos - startPos);
-        double distanceToMove = Math.abs(targetPos - currentPos);
-
-        double exponent;
-        if (totalMoveDist < 5) exponent = 2;
-        else if (totalMoveDist < 15) exponent = 4;
-        else if (totalMoveDist < 25) exponent = 6;
-        else exponent = 6;
-
-        double negAdjust;
-        if ((totalMoveDist > 0) && ((currentPos - startPos) < 2)) negAdjust = (totalMoveDist - 1);
-        else negAdjust = 0;
-
-        double distanceRemaining = Math.abs(targetPos - currentPos);
-        if (distanceRemaining > stopTolerance) {
-//            return (-(Math.pow((((currentPos) - (totalMoveDist / 2) + negAdjust) / (totalMoveDist / 2)), (exponent))) + 1) * speed;
-//            return Math.pow(distanceToMove, speed / adjuster) * (currentPos < targetPos ? 1 : -1);
-            return Math.pow(distanceToMove, speed / 50) * (currentPos < targetPos ? 1 : -1);
-        } else {
-            return 0.0;
-        }
-    }
+//    /* ---------- used to slow a motor down when approching target pos ---------- */
+//    /* ------------- returns (distance left to travel)^(1/adjuster) ------------- */
+//    private double fakePid(DcMotorX motor, double startPos, double targetPos, double speed, /*double exponent, /*double adjuster,*/ double stopTolerance) {
+//        double currentPos = motor.getPosition();
+//        double totalMoveDist = (targetPos - startPos);
+//        double distanceToMove = Math.abs(targetPos - currentPos);
+//
+//        double exponent;
+//        if (totalMoveDist < 5) exponent = 2;
+//        else if (totalMoveDist < 15) exponent = 4;
+//        else if (totalMoveDist < 25) exponent = 6;
+//        else exponent = 6;
+//
+//        double negAdjust;
+//        if ((totalMoveDist > 0) && ((currentPos - startPos) < 2)) negAdjust = (totalMoveDist - 1);
+//        else negAdjust = 0;
+//
+//        double distanceRemaining = Math.abs(targetPos - currentPos);
+//        if (distanceRemaining > stopTolerance) {
+////            return (-(Math.pow((((currentPos) - (totalMoveDist / 2) + negAdjust) / (totalMoveDist / 2)), (exponent))) + 1) * speed;
+////            return Math.pow(distanceToMove, speed / adjuster) * (currentPos < targetPos ? 1 : -1);
+//            return Math.pow(distanceToMove, speed / 50) * (currentPos < targetPos ? 1 : -1);
+//        } else {
+//            return 0.0;
+//        }
+//    }
 
 
 }

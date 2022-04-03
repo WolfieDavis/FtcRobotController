@@ -22,7 +22,7 @@ import org.firstinspires.ftc.teamcode.api.Odometry;
  * ruined by: Cailean Sorce
  */
 
-@TeleOp
+//@TeleOp
 public class odometryTest extends OpMode {
 
     DistanceSensor detectRed;

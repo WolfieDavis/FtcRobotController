@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.api.Odometry;
 import org.firstinspires.ftc.teamcode.api.ServoX;
 import org.firstinspires.ftc.teamcode.api.State;
 
-@TeleOp
+//@TeleOp
 public class jvDrive extends OpMode {
 
 

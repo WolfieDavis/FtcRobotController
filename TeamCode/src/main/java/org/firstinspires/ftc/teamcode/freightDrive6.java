@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.api.State;
  */
 
 @TeleOp
-public class freightDrive3 extends OpMode {
+public class freightDrive6 extends OpMode {
 
 
     private Drivetrain drivetrain;
@@ -43,7 +43,7 @@ public class freightDrive3 extends OpMode {
 
     private double
             //various positions the outake arm can be in, in inches from the bottom
-            linearMaxSpeed = 0.2,
+            linearMaxSpeed = 0.7,
             linOffset = 0,
             minLinearPos = 0.9525 + linOffset, //0.635 = .25" //0.375 //the btm position of the outake (how far down it will go)
             maxLinearPos = 34.625 + linOffset,//13.625" //13.6875 total    //15.875 - the top position of the outake (how far up it will go)
@@ -54,15 +54,15 @@ public class freightDrive3 extends OpMode {
             linearMidPos = 20.32 + linOffset, //8" //the dump low position
             linearGoToPos = -1, // used to keep track of which position to go to
 
-
     //bucket positions and trip point
     outtakeLinearTrip = 1 + linOffset, //the bucket tips up to hold stuff in when linear is moved above this point
-            outtakeTravelPos = 137.5, //137.5      //125 //120 - the bucket is in this angle when traveling
-            outtakeCollectPos = 180, //175         //175 //180 - 178 is too low, 175 is too high - the bucket is in this position when collecting
-            outtakeDumpPos = 85, //85              //80 //100, 45 - the bucket is in this position when dumping
+    outtakeTravelPos = 137.5, //137.5      //125 //120 - the bucket is in this angle when traveling
+    outtakeCollectPos = 180, //175         //175 //180 - 178 is too low, 175 is too high - the bucket is in this position when collecting
+    outtakeDumpPos = 85, //85              //80 //100, 45 - the bucket is in this position when dumping
 //        private TouchSensor spinLimit,
 //                linearBtmLimit;
     //limit switch is named spinLimit
+
 
     tapePanValue = 90,
             tapeTiltValue = 90,
@@ -73,6 +73,10 @@ public class freightDrive3 extends OpMode {
             tapeExtendPower = 0.85,
             tapePanMultiplier = 0.10, //.15
             tapeTiltMultiplier = 0.10; //.15
+
+    String lastLimitHit = null;
+    String currentLimitHit = null;
+
 
 
     // Using a custom state instead of saving entire gamepad1 (doing otherwise causes lag)
@@ -115,8 +119,8 @@ public class freightDrive3 extends OpMode {
         //tip.setAngle(90);
 
         bottom = hardwareMap.touchSensor.get("bottom");
-//        low = hardwareMap.touchSensor.get("low");
-//        middle = hardwareMap.touchSensor.get("middle");
+        low = hardwareMap.touchSensor.get("low");
+        middle = hardwareMap.touchSensor.get("middle");
         top = hardwareMap.touchSensor.get("top");
 
         drivetrain.setBrake(true);
@@ -140,27 +144,6 @@ public class freightDrive3 extends OpMode {
 
     public void loop() {
 
-        /* ------------- loop to fix the init position if auton messed up ------------- */
-//        if (fixLoopContinue != 1) {
-////            fixInitLoop();
-//            double maxSpeed = 0.5;
-//            if (Math.abs(gamepad2.right_stick_y) > .1) {
-//                linear.setVelocity(gamepad2.right_stick_y * maxSpeed);
-//            } else {
-//                linear.setVelocity(0.0);
-//            }
-//
-//            if (gamepad2.right_stick_button) {
-//                outtake.setAngle(outtakeTravelPos);
-//            }
-//
-//            if (gamepad2.left_stick_button) {
-////                fixLoopContinue = 1;
-//                linear.reset(); //assuming the outake arm is at the btm, set the encoder to 0
-////                drivetrain.stop();
-//            }
-
-//        } else {
         /* ------------- define variables to keep track of the controls ------------- */
 
         //joystick values for driving.
@@ -222,84 +205,70 @@ public class freightDrive3 extends OpMode {
 //        }//reverses the bot
 
 
+        double linearMaxSpeed = 0.4;
+
         if (bottom.isPressed()) linOffset = linear.getPosition();
 
         /* ------------- move the outake linear slide ( called "linear") ------------ */
         // first check if the triggers have been pressed (for manual movement). if they have been and the arm is not at the end of its travel, move the arm at the speed indicated by the trigger.
-        if (gamepad2.right_trigger > 0.01 && linear.getPosition() < maxLinearPos && !top.isPressed()) {
-            // linear.controlVelocity();                       //change to the appropriate control mode
+        if (gamepad2.right_trigger > 0.01 && !top.isPressed()) {
             linear.setVelocity(gamepad2.right_trigger * linearMaxSpeed);    // set the speed of the arm
-            linearGoToPos = -1;                      // cancel any automatic movement
-        } else if (gamepad2.left_trigger > 0.01 && linear.getPosition() > minLinearPos && !bottom.isPressed()) {
-            // linear.controlVelocity();
+        } else if (gamepad2.left_trigger > 0.01 && !bottom.isPressed()) {
             linear.setVelocity(-gamepad2.left_trigger * linearMaxSpeed);
-            linearGoToPos = -1;
 
-            //if there is no manual movement...
         } else {
             //check the dpad for automatic movement requests, and record the position requested in the linearGoToPos variable. recording the requested position like this means the driver doesn't have to keep the dpad depressed until the movement is finished, they can just press and release it.
-
-//            if (dpadUpHit2) {
-//                linearGoToPos = linearUpPos;
-//            } else if (dpadDownHit2) {
-//                linearGoToPos = linearDownPos;
-//            } else if (dpadLeftHit2) {
-//                linearGoToPos = linearMidPos;
-//            } else if (dpadRightHit2) {
-//                linearGoToPos = linearStagedPos;
-//            }
-
-            //if there is automatic movement requested (can be from current iteration OR from past iteration) go to the position
-            if (linearGoToPos != -1) {
-                //linear.controlPosition();
-                //TODO: THIS MIGHT NEED TO HAVE A 2nd ARG of 0.7 or 1 (the speed)
-                // linear.setPosition(linearGoToPos, 0.7); //does this work now if I add a comment
-//                linear.setVelocity(fakePid(linear, linearGoToPos, 0.8, 4, 1.5875)); //0.625 //change the 3rd arg to adjust slow down speed, should be >1
-                linear.setVelocity(fakePid(linear, linear.getPosition(), linearGoToPos, 0.2, 1.7));
-                //0.7
-                //finally if no manual control was requested AND there is no automatic control, set the velocity to 0
+            if (dpadUpHit2 && !top.isPressed() && !low.isPressed()) {
+                linear.setPower(0.2);
+            } else if (dpadDownHit2 && !middle.isPressed() && !top.isPressed() && !low.isPressed()) {
+                linear.setPower(0.2);
+            } else if (dpadLeftHit2 && !low.isPressed() && !top.isPressed()) {
+                linear.setPower(0.2);
+            } else if (dpadRightHit2 && !bottom.isPressed() && !top.isPressed() && !low.isPressed()) {
+                linear.setPower(0.2);
             } else {
-                // linear.controlVelocity();
                 linear.setVelocity(0.0);
             }
         }
 
+        /* ----------------- logic for how high the bucket is ---------------- */
+        if (bottom.isPressed()) currentLimitHit = "bottom";
+        else if (low.isPressed()) currentLimitHit = "low";
+        else if (middle.isPressed()) currentLimitHit = "middle";
+        else if (top.isPressed()) currentLimitHit = "top";
 
-        /* ------------------------- set the bucket position ------------------------ */
-//        if (y1||y2){ // if a "dump"  has been requested
-//            outtake.setAngle(outtakeDumpPos);
-//
-//        //if the bucket is in the upper section of the arm (traveling or dumping position) tip it back a little to keep stuff from falling out
-//        } else if ((linear.getPosition() > outtakeLinearTrip) &&! (x2||a2)){
-//            outtake.setAngle(outtakeTravelPos);
-//
-//        //if the bucket is in the lower section of the arm tip it down to the collecting position
+        if (!bottom.isPressed() && (currentLimitHit == "bottom")) lastLimitHit = "bottom";
+        else if (!low.isPressed() && (currentLimitHit == "low")) lastLimitHit = "low";
+        else if (!middle.isPressed() && (currentLimitHit == "middle")) lastLimitHit = "middle";
+        else if (!top.isPressed() && (currentLimitHit == "top")) lastLimitHit = "top";
+
+
+        if (y2) outtake.setAngle(160);
+//        else if (low.isPressed() && lastLimitHit == "middle") outtake.setAngle(outtakeCollectPos);
+//        else if (low.isPressed() && lastLimitHit == "bottom") outtake.setAngle(outtakeTravelPos);
+
+
+//        /* ----------------- set the bucket position w/ compound ---------------- */
+//        if (x2 && (linear.getPosition() > 13.25)) {
+//            outtake.setAngle(160);
+//            tip.setAngle(2);
+//        } else if (a2 && (linear.getPosition() > 13.25)) {
+//            outtake.setAngle(160);
+//            tip.setAngle(180);
 //        } else {
-//            outtake.setAngle(outtakeCollectPos);
+//            tip.setAngle(87); //90 but moved to avoid hitting the wire
+//            if ((y1 || y2) && (linear.getPosition() > 9)) { // if a "dump"  has been requested
+//                outtake.setAngle(outtakeDumpPos);
+//
+//                //if the bucket is in the upper section of the arm
+//            } else if (linear.getPosition() > outtakeLinearTrip) {
+//                outtake.setAngle(outtakeTravelPos);
+//
+//                //if the bucket is in the lower section of the arm tip it down
+//            } else {
+//                outtake.setAngle(outtakeCollectPos);
+//            }
 //        }
-
-
-        /* ----------------- set the bucket position w/ compound ---------------- */
-        if (x2 && (linear.getPosition() > 13.25)) {
-            outtake.setAngle(160);
-            tip.setAngle(2);
-        } else if (a2 && (linear.getPosition() > 13.25)) {
-            outtake.setAngle(160);
-            tip.setAngle(180);
-        } else {
-            tip.setAngle(87); //90 but moved to avoid hitting the wire
-            if ((y1 || y2) && (linear.getPosition() > 9)) { // if a "dump"  has been requested
-                outtake.setAngle(outtakeDumpPos);
-
-                //if the bucket is in the upper section of the arm
-            } else if (linear.getPosition() > outtakeLinearTrip) {
-                outtake.setAngle(outtakeTravelPos);
-
-                //if the bucket is in the lower section of the arm tip it down
-            } else {
-                outtake.setAngle(outtakeCollectPos);
-            }
-        }
 
 
 
@@ -349,7 +318,7 @@ public class freightDrive3 extends OpMode {
             intakeToggle *= -1;
             switch (intakeToggle) {
                 case -1:
-                    intake.setPower(1 * intakeSpinDir);
+                    intake.setPower(0.7 * -intakeSpinDir);
                     break;
                 case 1:
                     intake.setPower(0.0);
@@ -373,7 +342,7 @@ public class freightDrive3 extends OpMode {
         if (Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
             double multiplier = (isReversed) ? -1 : 1;
 //            drivetrain.driveWithGamepad(0.8, rateCurve(-rightY, 1.7), rateCurve(-leftX, 1.7) * multiplier * 0.625, rateCurve(rightX, 1.7)); //curved stick rates
-            drivetrain.driveWithGamepad(0.95, rateCurve(-rightY, 1.9), rateCurve(-leftX, 1.9) * multiplier * 0.7, rateCurve(rightX, 1.9)); //curved stick rates
+            drivetrain.driveWithGamepad(0.9, rateCurve(-rightY, 1.7), rateCurve(-leftX, 1.7) * multiplier * 0.7 / 0.9, rateCurve(rightX, 1.7)); //curved stick rates
         } else {
             // If the joysticks are not pressed, do not move the bot
             drivetrain.stop();
@@ -395,7 +364,7 @@ public class freightDrive3 extends OpMode {
 
         telemetry.addData("Data:", linear.getPosition());
 
-//        telemetry.addData()
+//        telemetry.addData();
 //         telemetry.addData("Dpad up: ", dpadUp2);
 
 

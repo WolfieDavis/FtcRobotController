@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.api.DcMotorX;
 import org.firstinspires.ftc.teamcode.api.Drivetrain;
 import org.firstinspires.ftc.teamcode.api.ServoX;
 
-@Autonomous
+//@Autonomous
 public class jvAuton extends LinearOpMode {
 
     private Drivetrain drivetrain;
