@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.oldCode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.api.State;
  * ruined by: Cailean Sorce
  */
 
-@TeleOp
+//@TeleOp
 public class freightDrive3 extends OpMode {
 
 

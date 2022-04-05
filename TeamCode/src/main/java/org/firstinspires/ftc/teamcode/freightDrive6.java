@@ -66,11 +66,11 @@ public class freightDrive6 extends OpMode {
 
     tapePanValue = 90,
             tapeTiltValue = 90,
-            panMin = 60, //left
-            panMax = 120, //right
-            tiltMin = 40, //down
-            tiltMax = 115, //up
-            tapeExtendPower = 0.85,
+            panMin = 90-50, //left
+            panMax = 90+50, //right
+            tiltMin = 90-50, //down
+            tiltMax = 90+40, //up
+            tapeExtendPower = 1, //.85
             tapePanMultiplier = 0.10, //.15
             tapeTiltMultiplier = 0.10; //.15
 
@@ -205,7 +205,8 @@ public class freightDrive6 extends OpMode {
 //        }//reverses the bot
 
 
-        double linearMaxSpeed = 0.4;
+        double linearMaxSpeed = 0.8;
+        double linearPosSpeed = 0.3;
 
         if (bottom.isPressed()) linOffset = linear.getPosition();
 
@@ -217,15 +218,15 @@ public class freightDrive6 extends OpMode {
             linear.setVelocity(-gamepad2.left_trigger * linearMaxSpeed);
 
         } else {
-            //check the dpad for automatic movement requests, and record the position requested in the linearGoToPos variable. recording the requested position like this means the driver doesn't have to keep the dpad depressed until the movement is finished, they can just press and release it.
+//            //check the dpad for automatic movement requests, and record the position requested in the linearGoToPos variable. recording the requested position like this means the driver doesn't have to keep the dpad depressed until the movement is finished, they can just press and release it.
             if (dpadUpHit2 && !top.isPressed() && !low.isPressed()) {
-                linear.setPower(0.2);
+                linear.setPower(linearPosSpeed);
             } else if (dpadDownHit2 && !middle.isPressed() && !top.isPressed() && !low.isPressed()) {
-                linear.setPower(0.2);
+                linear.setPower(linearPosSpeed);
             } else if (dpadLeftHit2 && !low.isPressed() && !top.isPressed()) {
-                linear.setPower(0.2);
+                linear.setPower(linearPosSpeed);
             } else if (dpadRightHit2 && !bottom.isPressed() && !top.isPressed() && !low.isPressed()) {
-                linear.setPower(0.2);
+                linear.setPower(linearPosSpeed);
             } else {
                 linear.setVelocity(0.0);
             }
@@ -243,7 +244,8 @@ public class freightDrive6 extends OpMode {
         else if (!top.isPressed() && (currentLimitHit == "top")) lastLimitHit = "top";
 
 
-        if (y2) outtake.setAngle(160);
+        if (y2) outtake.setAngle(outtakeDumpPos);
+        else outtake.setAngle(outtakeCollectPos);
 //        else if (low.isPressed() && lastLimitHit == "middle") outtake.setAngle(outtakeCollectPos);
 //        else if (low.isPressed() && lastLimitHit == "bottom") outtake.setAngle(outtakeTravelPos);
 
@@ -362,7 +364,7 @@ public class freightDrive6 extends OpMode {
 
         /* ------- print to telemetry (used for calibration/ trouble shooting) ------ */
 
-        telemetry.addData("Data:", linear.getPosition());
+//        telemetry.addData("Data:", linear.getPosition());
 
 //        telemetry.addData();
 //         telemetry.addData("Dpad up: ", dpadUp2);

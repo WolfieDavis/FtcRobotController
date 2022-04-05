@@ -1,15 +1,19 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.testCode;
 
+import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.api.ControlledDrivetrain;
 import org.firstinspires.ftc.teamcode.api.DcMotorX;
-import org.firstinspires.ftc.teamcode.api.Odometry;
+import org.firstinspires.ftc.teamcode.api.Drivetrain;
+import org.firstinspires.ftc.teamcode.api.ControlledDrivetrain;
+import org.firstinspires.ftc.teamcode.api.LimitedMotorX;
 import org.firstinspires.ftc.teamcode.api.ServoX;
 import org.firstinspires.ftc.teamcode.api.State;
+import org.firstinspires.ftc.teamcode.api.Odometry;
 
 /*
  * Robohawks ftc team 5741
@@ -19,7 +23,7 @@ import org.firstinspires.ftc.teamcode.api.State;
  */
 
 //@TeleOp
-public class odometryTestDeg extends OpMode {
+public class odometryTest extends OpMode {
 
     DistanceSensor detectRed;
     DistanceSensor detectBlue;
@@ -60,7 +64,7 @@ public class odometryTestDeg extends OpMode {
                 new DcMotorX(hardwareMap.dcMotor.get("mLF"), ticksPerRev, (-circumference)), //left pod
                 new DcMotorX(hardwareMap.dcMotor.get("mLB"), ticksPerRev, -(circumference)), //back pod
                 50,
-                22.222*(180/Math.PI), //170.556/ (2*Math.PI), //-169.076 //-6.41, //-120.63  //-2.25 / (2 * Math.PI), //2.25 2.3 // old: -41.577 / (2 * Math.PI)  //6.15 cm from the middle for old   //19.2 cm from the middle for new
+                22.222, //170.556/ (2*Math.PI), //-169.076 //-6.41, //-120.63  //-2.25 / (2 * Math.PI), //2.25 2.3 // old: -41.577 / (2 * Math.PI)  //6.15 cm from the middle for old   //19.2 cm from the middle for new
                 26.7385, //cm between side odometry wheels
                 0, //set to 0 as in auto from last year - in documentation they were set to 5
                 0,
@@ -156,8 +160,8 @@ public class odometryTestDeg extends OpMode {
 //        telemetry.addData("tics of rear:", drivetrain.mLB.getPosition());
 //        telemetry.addData("rear cm tics:", drivetrain.mLB.getPosition()*circumference);
 
-        telemetry.addData("distance", detectRed.getDistance(DistanceUnit.CM));
-        telemetry.addData("distance", detectBlue.getDistance(DistanceUnit.CM));
+        telemetry.addData("distance red", detectRed.getDistance(DistanceUnit.CM));
+        telemetry.addData("distance blue", detectBlue.getDistance(DistanceUnit.CM));
 //        telemetry.addData("distance", detectL.getDistance(DistanceUnit.CM));
     }//end of loop
 

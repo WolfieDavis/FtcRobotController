@@ -18,11 +18,11 @@ public class tapeMeasureFun extends OpMode {
     private double
             tapePanValue = 90,
             tapeTiltValue = 90,
-            panMin = 60, //left
-            panMax = 120, //right
-            tiltMin = 40, //down
-            tiltMax = 115, //up
-            tapeExtendPower = 0.85,
+            panMin = 90-50, //left
+            panMax = 90+50, //right
+            tiltMin = 90-50, //down
+            tiltMax = 90+40, //up
+            tapeExtendPower = 1, //.85
             tapePanMultiplier = 0.10, //.15
             tapeTiltMultiplier = 0.10; //.15
 
