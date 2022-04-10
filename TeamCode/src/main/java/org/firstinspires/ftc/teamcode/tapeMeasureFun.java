@@ -16,15 +16,15 @@ public class tapeMeasureFun extends OpMode {
             tapeTilt;
 
     private double
+            tapeExtendPower = 1, //.85
             tapePanValue = 90,
             tapeTiltValue = 90,
-            panMin = 90-50, //left
-            panMax = 90+50, //right
-            tiltMin = 90-50, //down
-            tiltMax = 90+40, //up
-            tapeExtendPower = 1, //.85
-            tapePanMultiplier = 0.10, //.15
-            tapeTiltMultiplier = 0.10; //.15
+            panMin = 90 - 50, //left
+            panMax = 90 + 50, //right
+            tiltMin = 90 - 50, //down
+            tiltMax = 90 + 40, //up
+            tapePanMultiplier = 0.2, //.15
+            tapeTiltMultiplier = 0.15; //.15
 
     public void init() {
         tapeExtend = new DcMotorX(hardwareMap.dcMotor.get("odoRear"));
@@ -36,7 +36,7 @@ public class tapeMeasureFun extends OpMode {
     public void loop() {
         /* ------------------------ tape measure pan/tile/extend ----------------------- */
         if (Math.abs(gamepad2.left_stick_y) > .1)
-            tapeExtend.setPower(gamepad2.left_stick_y * tapeExtendPower);
+            tapeExtend.setPower(-gamepad2.left_stick_y * tapeExtendPower);
         else tapeExtend.setPower(0);
 
         if (Math.abs(gamepad2.right_stick_x) > .1 || Math.abs(gamepad2.right_stick_y) > .1) {

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.testCode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.api.State;
  * ruined by: Cailean Sorce
  */
 
-@TeleOp
+//@TeleOp
 public class freightDriveLimit extends OpMode {
 
 
@@ -223,11 +223,15 @@ public class freightDriveLimit extends OpMode {
 //                }
 //            }
 
-
-            if (y2) outtake.setAngle(160);
+        //outtake with logic
+            if (y2) outtake.setAngle(outtakeDumpPos);
             else if (low.isPressed() && lastLimitHit == "middle") outtake.setAngle(outtakeCollectPos);
             else if (low.isPressed() && lastLimitHit == "bottom") outtake.setAngle(outtakeTravelPos);
 
+//        /* ----------------- set the bucket position w/ limit logic ---------------- */
+//        if (y2) outtake.setAngle(outtakeDumpPos);
+//        else if (!gamepad2.y && !bottom.isPressed()) outtake.setAngle(outtakeTravelPos);
+//        else outtake.setAngle(outtakeCollectPos);
 
             /* ------------------------ odometry pods up and down ----------------------- */
 

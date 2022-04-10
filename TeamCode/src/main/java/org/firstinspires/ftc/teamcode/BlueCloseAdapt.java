@@ -43,7 +43,9 @@ public class BlueCloseAdapt extends LinearOpMode {
             tip,
             odoL,
             odoR,
-            odoB;
+            odoB,
+            tapePan,
+            tapeTilt;
     DistanceSensor detectBlue;
     DistanceSensor detectRed;
     private TouchSensor
@@ -51,6 +53,16 @@ public class BlueCloseAdapt extends LinearOpMode {
             low,
             middle,
             top;
+    private double
+            tapePanValue = 90,
+            tapeTiltValue = 90,
+            panMin = 90 - 50, //left
+            panMax = 90 + 50, //right
+            tiltMin = 90 - 50, //down
+            tiltMax = 90 + 40, //up
+            tapeExtendPower = 1, //.85
+            tapePanMultiplier = 0.10, //.15
+            tapeTiltMultiplier = 0.10; //.15
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -70,6 +82,8 @@ public class BlueCloseAdapt extends LinearOpMode {
         odoL = new ServoX(hardwareMap.servo.get("odoL"));
         odoR = new ServoX(hardwareMap.servo.get("odoR"));
         odoB = new ServoX(hardwareMap.servo.get("odoB"));
+        tapePan = new ServoX(hardwareMap.servo.get("tapePan"), 180, panMax, panMin);
+        tapeTilt = new ServoX(hardwareMap.servo.get("tapeTilt"), 180, tiltMax, tiltMin);
 
         //sensors and limit switches
         detectBlue = hardwareMap.get(DistanceSensor.class, "detectBlue");
@@ -110,32 +124,37 @@ public class BlueCloseAdapt extends LinearOpMode {
         /* ------------ setup movement ------------ */
         //movement parameters
         double exponent = 4; //4 //exponent that the rate curve is raised to
-        double[] speed = {0.45, 0.35, 0.35}; //todo: fix this... or leave it??
+        double[] speed = {0.45, 0.35, 0.35}; //todo: increase this... or leave it??
         double[] detectSpeed = {0.35, 0.2, 0.35};
         double[] stopTolerance = {4, (Math.PI / 45)}; //4 //acceptable tolerance (cm for linear, radians for turning) for the robot to be in a position
         double[] drivePower;
 
         //positions: in the format x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
-        double[] carousel = {(32.5 -5) * side, -20.75, 0}; //todo: fine tune this
-        double[] ash = {118.5 * side, -104, 0}; //-102 for y
+//        double[] carousel = {-23, -50, 0}; //works for bottom corner
+        double[] carousel = {35 * side, -45, 0}; //todo: fine tune this
+        double[] ash = {127.5 * side, -103, 0}; //-102 for y
         double[] asuPark = {91.75 * side, -25, 0}; //89, -25, 0
         double[] detect2 = {53 * side, -91 - 1, 0}; //68.5 too far //location for detecting the top placement
         double[] detect1 = {53 * side, -68.5, 0}; //location for detecting the middle location
 
         //outtake (linear) variables
-        double maxLinearPower = 0.3;
+        double maxLinearPower = 0.5;
 
         //outtake (servo) positions
-        double outtakeTravelPos = 137.5; //servo position for travel
-        double outtakeDumpPos = 85; //servo position for dump
-        double outtakeCollectPos = 180;
+        double outtake2Offset = 15+5, //-15 bc slide is 15 deg, and 5 for other adjustment
+                outtake2CollectPos = 0 + outtake2Offset, //starting with 0 as bottom
+                outtake2TravelPos = 42.5 + outtake2Offset,
+                outtake2DumpPos = 95 + outtake2Offset;
+
 
         /* --------------- move robot --------------- */
         //retract odometry pods and set buket to travel position
-        outtake.setAngle(outtakeTravelPos);
+        outtake.setAngle(outtake2TravelPos);
         odoL.setAngle(0);
         odoR.setAngle(0);
-        odoB.goToAngle(0, 2000);
+        odoB.setAngle(0);
+        tapePan.setAngle(90);
+        tapeTilt.goToAngle(90, 2000);
 
         //go to detect location
         do {
@@ -149,7 +168,7 @@ public class BlueCloseAdapt extends LinearOpMode {
         double detectZone[];
 
         if (side == -1) { //if side is blue - 0,1,2 positions = low, middle, top
-            double distance = detectRed.getDistance(DistanceUnit.CM);
+            double distance = detectBlue.getDistance(DistanceUnit.CM);
 
             if (distance < 20) {
                 levelTarget = 0;
@@ -166,17 +185,13 @@ public class BlueCloseAdapt extends LinearOpMode {
                     levelTarget = 1;
                     detectZone = detect2;
                 } else {
-                    levelTarget = 1;
+                    levelTarget = 2;
                     detectZone = detect1;
                 }
             }
-            if (levelTarget == 0) telemetry.addData("level", "low");
-            else if (levelTarget == 1) telemetry.addData("level", "middle");
-            else telemetry.addData("level", "top");
-            telemetry.update();
 
-        } else {//if side is blue - 0,1,2 positions = top, middle, low
-            double distance = detectBlue.getDistance(DistanceUnit.CM);
+        } else {//else side is red - 0,1,2 positions = top, middle, low
+            double distance = detectRed.getDistance(DistanceUnit.CM);
 
             if (distance < 20) {
                 levelTarget = 2;
@@ -188,7 +203,7 @@ public class BlueCloseAdapt extends LinearOpMode {
                 } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
                 sleep(750);
 
-                distance = detectBlue.getDistance(DistanceUnit.CM);
+                distance = detectRed.getDistance(DistanceUnit.CM);
                 if (distance < 20) {
                     levelTarget = 1;
                     detectZone = detect2;
@@ -197,11 +212,12 @@ public class BlueCloseAdapt extends LinearOpMode {
                     detectZone = detect1;
                 }
             }
-            if (levelTarget == 0) telemetry.addData("level", "low");
-            else if (levelTarget == 1) telemetry.addData("level", "middle");
-            else telemetry.addData("level", "top");
-            telemetry.update();
         }
+
+        if (levelTarget == 0) telemetry.addData("level", "low");
+        else if (levelTarget == 1) telemetry.addData("level", "middle");
+        else telemetry.addData("level", "top");
+        telemetry.update();
         sleep(500);
 
 
@@ -220,20 +236,20 @@ public class BlueCloseAdapt extends LinearOpMode {
         long timeOutDump = 5000;
 
         if (levelTarget == 0) {
-            do linear.setPower(maxLinearPower);
-            while (!low.isPressed() && !isStopRequested() && ((System.currentTimeMillis() - startDump) < timeOutDump));
+            do linear.setPower(maxLinearPower*0.8);
+            while (!!low.isPressed() && !!top.isPressed() && !isStopRequested() && ((System.currentTimeMillis() - startDump) < timeOutDump));
             linear.setPower(0);
         } else if (levelTarget == 1) {
             do linear.setPower(maxLinearPower);
-            while (!middle.isPressed() && !isStopRequested() && ((System.currentTimeMillis() - startDump) < timeOutDump));
+            while (!!middle.isPressed() && !!top.isPressed() && !isStopRequested() && ((System.currentTimeMillis() - startDump) < timeOutDump));
             linear.setPower(0);
         } else {
             do linear.setPower(maxLinearPower);
-            while (!top.isPressed() && !isStopRequested() && ((System.currentTimeMillis() - startDump) < timeOutDump));
+            while (!!top.isPressed() && !isStopRequested() && ((System.currentTimeMillis() - startDump) < timeOutDump));
             linear.setPower(0);
         }
         sleep(250);
-        outtake.goToAngle(outtakeDumpPos, 1500);
+        outtake.goToAngle(outtake2DumpPos, 1500);
 
         sleep(500);
 
@@ -249,7 +265,7 @@ public class BlueCloseAdapt extends LinearOpMode {
 
 
         //spin carousel
-        spin(spinner, -0.5 * side, 6000); //turns on carousel spinner at power 0.5 for 500ms (or whatever you set them to)
+        spin(spinner, 0.6 * side, 6000); //turns on carousel spinner at power 0.5 for 500ms (or whatever you set them to)
 
 
         //park in asu
@@ -263,10 +279,10 @@ public class BlueCloseAdapt extends LinearOpMode {
 
 
         //lower slide to be ready to start teleop
-        outtake.goToAngle(outtakeTravelPos, 750);
+        outtake.goToAngle(outtake2TravelPos, 750);
         do {
-            linear.setPower(-maxLinearPower);
-        } while (!bottom.isPressed() && !isStopRequested());
+            linear.setPower(-maxLinearPower*0.75);
+        } while (!!bottom.isPressed() && !isStopRequested());
         sleep(500);
 
 
