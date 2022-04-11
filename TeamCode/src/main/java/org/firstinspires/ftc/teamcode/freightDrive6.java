@@ -49,7 +49,7 @@ public class freightDrive6 extends OpMode {
 
     //outtake servo positions
     outtake2Offset = 15 + 5, //-15 bc slide is 15 deg, and 5 for other adjustment
-            outtake2CollectPos = 0 + outtake2Offset, //starting with 0 as bottom
+            outtake2CollectPos = -3.5 + outtake2Offset, //starting with 0 as bottom
             outtake2TravelPos = 42.5 + outtake2Offset,
             outtake2DumpPos = 95 - 10 + outtake2Offset,
             outtake2DumpPos2 = 95 - 15 + outtake2Offset,
@@ -132,6 +132,7 @@ public class freightDrive6 extends OpMode {
         tapeTilt.setAngle(90);
 
         //initialize bucket servos
+        linear.setPower(0.3);
 //        outtake.setAngle(outtake2TravelPos);
 //        outtake2.setAngle(outtake2TravelPos);
 //        tip.setAngle(87);
@@ -236,7 +237,7 @@ public class freightDrive6 extends OpMode {
 
         /* ------------ set the 2 servo bucket position w/ limit logic ----------- */
         if (y2) {
-            if (top.isPressed()) {
+            if (!top.isPressed()) {
                 linear.setPower(0);
                 outtake.setAngle(outtake2DumpPos);
                 outtake2.setAngle(outtake2DumpPos);
@@ -246,7 +247,7 @@ public class freightDrive6 extends OpMode {
                 outtake2.setAngle(outtake2TravelPos);
             }
         } else if (x2) {
-            if (top.isPressed()) {
+            if (!top.isPressed()) {
                 linear.setPower(0);
                 outtake.setAngle(outtake2DumpPos2);
                 outtake2.setAngle(outtake2DumpPos2);
@@ -313,7 +314,7 @@ public class freightDrive6 extends OpMode {
         spinDirection = (bumperLeftHit1 || bumperLeftHit2) ? spinDirection *= -1 : spinDirection; //reverse the direction if left bumper  is pressed
         //carousel spinner triggered w/ a press
         if (a1) {
-            spinner.setPower(-0.8 * spinDirection);
+            spinner.setPower(-0.85 * spinDirection);
         } else {
             spinner.setPower(0);
         }
