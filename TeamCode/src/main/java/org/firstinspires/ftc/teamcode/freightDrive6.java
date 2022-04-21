@@ -62,8 +62,11 @@ public class freightDrive6 extends OpMode {
             panMax = 90 + 50, //right
             tiltMin = 90 - 50, //down
             tiltMax = 90 + 40, //up
-            tapePanMultiplier = 0.2, //.15
-            tapeTiltMultiplier = 0.15; //.15
+            tapePanMultiplier = 0.20*2, //.15
+            tapeTiltMultiplier = 0.15*2, //.15
+
+    //drive vars
+    drivePower;
 
 
     // Using a custom state instead of saving entire gamepad1 (doing otherwise causes lag)
@@ -214,18 +217,7 @@ public class freightDrive6 extends OpMode {
             if (lastLimitHit != "low") linear.setPower(-gamepad2.left_trigger * linearDownSpeed);
             else linear.setPower(-gamepad2.left_trigger * Math.pow(linearDownSpeed, 2));
         } else {
-            //check the dpad for automatic movement requests, and record the position requested in the linearGoToPos variable. recording the requested position like this means the driver doesn't have to keep the dpad depressed until the movement is finished, they can just press and release it.
-            if (dpadUpHit2 && top.isPressed() && low.isPressed()) {
-                linear.setPower(linearPosSpeed);
-            } else if (dpadDownHit2 && middle.isPressed() && top.isPressed() && low.isPressed()) {
-                linear.setPower(linearPosSpeed);
-            } else if (dpadLeftHit2 && low.isPressed() && top.isPressed()) {
-                linear.setPower(linearPosSpeed);
-            } else if (dpadRightHit2 && bottom.isPressed() && top.isPressed() && low.isPressed()) {
-                linear.setPower(-linearPosSpeed);
-            } else {
                 linear.setVelocity(0.0);
-            }
         }
 
 //        int topPressed;
@@ -295,9 +287,9 @@ public class freightDrive6 extends OpMode {
         }
 
         /* -------------- set the intake spinner direction / on / off -------------- */
-        intakeSpinDir = (bumperRightHit1 || bumperRightHit2) ? intakeSpinDir *= -1 : intakeSpinDir;//toggles intake direction
+        intakeSpinDir = (bumperRightHit2) ? intakeSpinDir *= -1 : intakeSpinDir;//toggles intake direction
         //intake spinner is toggled if b is pressed
-        if (bHit1 || bHit2) {
+        if (bHit2) {
             intakeToggle *= -1;
             switch (intakeToggle) {
                 case -1:
@@ -322,9 +314,10 @@ public class freightDrive6 extends OpMode {
 
         /* ------------------------- control the drivetrain ------------------------- */
         // Drive the robot with joysticks if they are moved (with rates)
+        drivePower = 1 - (0.5*gamepad1.right_trigger) - (0.7*gamepad1.left_trigger);
         if (Math.abs(leftX) > .1 || Math.abs(rightX) > .1 || Math.abs(rightY) > .1) {
             double multiplier = (isReversed) ? -1 : 1;
-            drivetrain.driveWithGamepad(0.9, rateCurve(-rightY, 1.7), rateCurve(-leftX, 1.7) * multiplier * 0.7 / 0.9, rateCurve(rightX, 1.7)); //curved stick rates
+            drivetrain.driveWithGamepad(drivePower, rateCurve(-rightY, 1.7), rateCurve(-leftX, 1.7) * multiplier * 0.7 / 0.9, rateCurve(rightX, 1.7)); //curved stick rates
         } else {
             // If the joysticks are not pressed, do not move the bot
             drivetrain.stop();
@@ -343,6 +336,7 @@ public class freightDrive6 extends OpMode {
         lastBumpers2.update(bumperRight2, bumperLeft2);
 
         /* ---------------------data to read out on phone screen -------------------- */
+        telemetry.addData("drive power", drivePower);
         telemetry.addData("last hit", lastLimitHit);
         telemetry.addData("linear power", linear.getPower());
         telemetry.addData("pan", tapePanValue);

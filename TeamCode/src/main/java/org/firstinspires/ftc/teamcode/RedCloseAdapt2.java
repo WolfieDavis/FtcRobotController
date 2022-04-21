@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.api.ServoX;
 import java.util.Arrays;
 
 @Autonomous
-public class RedCloseAdapt extends LinearOpMode {
+public class RedCloseAdapt2 extends LinearOpMode {
 
     int side = 1; //modifier for side: set to 1 for red, or -1 for blue
 
@@ -74,6 +74,9 @@ public class RedCloseAdapt extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        /* ----------- waiting for start ----------- */
+        waitForStart();
+
         // Get all of the drivetrain motors
         mRF = new DcMotorX(hardwareMap.dcMotor.get("mRF"));
         mLF = new DcMotorX(hardwareMap.dcMotor.get("mLF"));
@@ -127,8 +130,6 @@ public class RedCloseAdapt extends LinearOpMode {
         telemetry.addData("Done initializing", "");
         telemetry.update();
 
-        /* ----------- waiting for start ----------- */
-        waitForStart();
 
         /* ------------ setup movement ------------ */
         //movement parameters

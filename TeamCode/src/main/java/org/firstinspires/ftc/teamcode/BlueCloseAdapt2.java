@@ -14,9 +14,9 @@ import org.firstinspires.ftc.teamcode.api.ServoX;
 import java.util.Arrays;
 
 @Autonomous
-public class RedCloseAdapt extends LinearOpMode {
+public class BlueCloseAdapt2 extends LinearOpMode {
 
-    int side = 1; //modifier for side: set to 1 for red, or -1 for blue
+    int side = -1; //modifier for side: set to 1 for red, or -1 for blue
 
     // Odometry parameters
     private int ticksPerRev = 8225; //left same as last year
@@ -74,6 +74,9 @@ public class RedCloseAdapt extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        /* ----------- waiting for start ----------- */
+        waitForStart();
+
         // Get all of the drivetrain motors
         mRF = new DcMotorX(hardwareMap.dcMotor.get("mRF"));
         mLF = new DcMotorX(hardwareMap.dcMotor.get("mLF"));
@@ -127,8 +130,6 @@ public class RedCloseAdapt extends LinearOpMode {
         telemetry.addData("Done initializing", "");
         telemetry.update();
 
-        /* ----------- waiting for start ----------- */
-        waitForStart();
 
         /* ------------ setup movement ------------ */
         //movement parameters
@@ -139,11 +140,12 @@ public class RedCloseAdapt extends LinearOpMode {
         double[] drivePower;
 
         //positions: in the format x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
-        double[] ash = {(127.5-1.5-5) * side, -99.9, 0}; //-102 for y
-        double[] ashLow = {(127.5-3-5) * side, -100.5, 0};
-        double[] carousel = {30 * side, -36, 0}; //todo: fine tune this
-        double[] carouselLow = {29 * side, -35.5, 0}; //todo: fine tune this
-        double[] asuPark = {92.5 * side, -25, 0}; //89, -25, 0
+        double[] ash = {(127.5-1.5) * side, -101, 0}; //-102 for y
+        double[] ashLow = {(127.5-3) * side, -101, 0};
+//        double[] carousel = {-23, -50, 0}; //works for bottom corner
+        double[] carousel = {27.8 * side, -39.5, 0}; //todo: fine tune this
+        double[] carouselLow = {27 * side, -39.5, 0}; //todo: fine tune this
+        double[] asuPark = {91.75 * side, -25, 0}; //89, -25, 0
         double[] detect2 = {56 * side, -88, 0}; //68.5 too far //location for detecting the top placement
         double[] detect1 = {56 * side, -65.5, 0}; //location for detecting the middle location
 

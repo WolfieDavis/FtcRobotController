@@ -146,8 +146,8 @@ public class BlueCloseAdapt extends LinearOpMode {
         double[] carousel = {27.8 * side, -39.5, 0}; //todo: fine tune this
         double[] carouselLow = {27 * side, -39.5, 0}; //todo: fine tune this
         double[] asuPark = {91.75 * side, -25, 0}; //89, -25, 0
-        double[] detect2 = {53 * side, -91-0.5, 0}; //68.5 too far //location for detecting the top placement
-        double[] detect1 = {53 * side, -68.5, 0}; //location for detecting the middle location
+        double[] detect2 = {56 * side, -88, 0}; //68.5 too far //location for detecting the top placement
+        double[] detect1 = {56 * side, -65.5, 0}; //location for detecting the middle location
 
         //outtake (linear) variables
         double maxLinearPower = 0.7;
@@ -177,8 +177,9 @@ public class BlueCloseAdapt extends LinearOpMode {
 
         if (side == -1) { //if side is blue - 0,1,2 positions = low, middle, top
             double distance = detectBlue.getDistance(DistanceUnit.CM);
-
-            if (distance < 20) {
+            telemetry.addData("dist", distance);
+            telemetry.update();
+            if (distance < 22) {
                 levelTarget = 0;
                 detectZone = detect2;
             } else {
@@ -189,7 +190,9 @@ public class BlueCloseAdapt extends LinearOpMode {
                 sleep(750);
 
                 distance = detectBlue.getDistance(DistanceUnit.CM);
-                if (distance < 20) {
+                telemetry.addData("dist", distance);
+                telemetry.update();
+                if (distance < 22) {
                     levelTarget = 1;
                     detectZone = detect2;
                 } else {
@@ -200,8 +203,9 @@ public class BlueCloseAdapt extends LinearOpMode {
 
         } else {//else side is red - 0,1,2 positions = top, middle, low
             double distance = detectRed.getDistance(DistanceUnit.CM);
-
-            if (distance < 20) {
+            telemetry.addData("dist", distance);
+            telemetry.update();
+            if (distance < 22) {
                 levelTarget = 2;
                 detectZone = detect2;
             } else {
@@ -212,7 +216,9 @@ public class BlueCloseAdapt extends LinearOpMode {
                 sleep(750);
 
                 distance = detectRed.getDistance(DistanceUnit.CM);
-                if (distance < 20) {
+                telemetry.addData("dist", distance);
+                telemetry.update();
+                if (distance < 22) {
                     levelTarget = 1;
                     detectZone = detect2;
                 } else {
