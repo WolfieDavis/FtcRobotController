@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.teamcode.api.DcMotorX;
 import org.firstinspires.ftc.teamcode.api.Drivetrain;
-import org.firstinspires.ftc.teamcode.api.LimitedMotorX;
 import org.firstinspires.ftc.teamcode.api.ServoX;
 import org.firstinspires.ftc.teamcode.api.State;
 
@@ -18,7 +17,7 @@ import org.firstinspires.ftc.teamcode.api.State;
  */
 
 @TeleOp
-public class freightDrive6 extends OpMode {
+public class freightDrive7 extends OpMode {
 
 
     private Drivetrain drivetrain;
@@ -124,9 +123,7 @@ public class freightDrive6 extends OpMode {
 
     public void start() {
         drivetrain.stop(); //stops odometry instance again to make sure
-
         linear.setBrake(true); //so that the outake motor arm will hold pos and won't "bounce"
-//        linear.controlVelocity();
 
         //lift odometry pods
         odoL.setAngle(155);
@@ -139,9 +136,6 @@ public class freightDrive6 extends OpMode {
 
         //initialize bucket servos
         linear.setPower(0.3);
-//        outtake.setAngle(outtake2TravelPos);
-//        outtake2.setAngle(outtake2TravelPos);
-//        tip.setAngle(87);
     }
 
 
@@ -234,32 +228,25 @@ public class freightDrive6 extends OpMode {
         if (y2) {
             if (!top.isPressed()) {
                 linear.setPower(0);
-                outtake.setAngle(outtake2DumpPos);
-                outtake2.setAngle(outtake2DumpPos);
+                outtakeBoth(outtake2DumpPos);
             } else {
                 linear.setPower(0.8);
-                outtake.setAngle(outtake2TravelPos);
-                outtake2.setAngle(outtake2TravelPos);
+                outtakeBoth(outtake2TravelPos);
             }
         } else if (x2) {
             if (!top.isPressed()) {
                 linear.setPower(0);
-                outtake.setAngle(outtake2DumpPos2);
-                outtake2.setAngle(outtake2DumpPos2);
+                outtakeBoth(outtake2DumpPos2);
             } else {
                 linear.setPower(0.8);
-                outtake.setAngle(outtake2TravelPos);
-                outtake2.setAngle(outtake2TravelPos);
+                outtakeBoth(outtake2TravelPos);
             }
         } else if (a2) {
-            outtake.setAngle(outtake2DumpPos);
-            outtake2.setAngle(outtake2DumpPos);
+            outtakeBoth(outtake2DumpPos);
         } else if (!gamepad2.y && bottom.isPressed()) {
-            outtake.setAngle(outtake2TravelPos);
-            outtake2.setAngle(outtake2TravelPos);
+            outtakeBoth(outtake2TravelPos);
         } else {
-            outtake.setAngle(outtake2CollectPos);
-            outtake2.setAngle(outtake2CollectPos);
+            outtakeBoth(outtake2CollectPos);
         }
 
 

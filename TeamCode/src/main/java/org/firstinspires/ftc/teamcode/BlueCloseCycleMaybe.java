@@ -1,3 +1,4 @@
+
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -14,9 +15,9 @@ import org.firstinspires.ftc.teamcode.api.ServoX;
 import java.util.Arrays;
 
 @Autonomous
-public class RedCloseAdapt2 extends LinearOpMode {
+public class BlueCloseCycleMaybe extends LinearOpMode {
 
-    int side = 1; //modifier for side: set to 1 for red, or -1 for blue
+    int side = 1; //reversed because starting the other way now //modifier for side: set to 1 for red, or -1 for blue
 
     // Odometry parameters
     private int ticksPerRev = 8225; //left same as last year
@@ -116,10 +117,15 @@ public class RedCloseAdapt2 extends LinearOpMode {
         // sets up drivetrain
         drivetrain = new Drivetrain(mRF, mLF, mRB, mLB);
 
-
         //sets up threading for odometry
         Thread positionTracking = new Thread(positionTracker);
         positionTracking.start();
+
+        //sets initial position for the drivetrain
+        double[] initialPos = {17 * side, -201.5, 0}; //x, y, phi
+        positionTracker.x = initialPos[0];
+        positionTracker.y = -initialPos[1];
+        positionTracker.phi = initialPos[2];
 
         //displays on the phone that everything has initialized correctly
         telemetry.addData("Done initializing", "");
@@ -127,26 +133,41 @@ public class RedCloseAdapt2 extends LinearOpMode {
 
 
         /* ------------ setup movement ------------ */
+        int shortWait = 100;
+        int longerWait = 250;
+
+
         //movement parameters
         double exponent = 4; //4 //exponent that the rate curve is raised to
-        double[] speed = {0.45, 0.35, 0.35}; //todo: increase this... or leave it??
+        double[] speed = {0.45, 0.35, 0.35}; //todo: turn up
+        double[] collectSpeed = {0.55, 0.5, 0.35};
         double[] detectSpeed = {0.35, 0.2, 0.35};
         double[] stopTolerance = {4, (Math.PI / 45)}; //4 //acceptable tolerance (cm for linear, radians for turning) for the robot to be in a position
         double[] drivePower;
 
+        //adjustment variables
+        double[] flipMod = {18 * 2.54 - 3};
+        double[] startOffset = {0, -47.25 * 2.54, 0};
+
         //positions: in the format x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
-        double[] ash = {(127.5-1.5-5) * side, -99.9, 0}; //-102 for y
-        double[] ashLow = {(127.5-3-5) * side, -100.5, 0};
-        double[] carousel = {29.5 * side, -36, 0}; //todo: fine tune this
-        double[] carouselLow = {29 * side, -35.5, 0}; //todo: fine tune this
-        double[] asuPark = {92.5 * side, -25, 0}; //89, -25, 0
-        double[] detect2 = {56 * side, -88, 0}; //68.5 too far //location for detecting the top placement
-        double[] detect1 = {56 * side, -65.5, 0}; //location for detecting the middle location
+        double[] detect2 = {56 * side, -88 + flipMod[0] - startOffset[1], 0}; //68.5 too far //location for detecting the top placement
+        double[] detect1 = {56 * side, -65.5 + flipMod[0] - startOffset[1], 0}; //location for detecting the middle location
+        double[] detect0 = {56 * side, detect1[2] - 22.5 + flipMod[0] - startOffset[1], 0};
+
+        double[] ash = {(127.5 - 1.5) * side, -195, 0}; //-102 for y
+        double[] ashLow = {(127.5 - 3) * side, -195, 0};
+
+        double[] wallTolerance = {1};
+        double[] goToWall = {(initialPos[0] + 0.5) * side, ash[1], 0};
+        double[] getFreight = {(goToWall[0] + 3) * side, 280, 0};
+        double[] warehousePark = {getFreight[0] * side, 275, 0};
+
+        double[] carousel = {27.8 * side, -39.5, 0}; //todo: fine tune this
+        double[] carouselLow = {27 * side, -39.5, 0}; //todo: fine tune this
+        double[] asuPark = {91.75 * side, -25, 0}; //89, -25, 0
 
         //outtake (linear) variables
         double maxLinearPower = 0.7;
-
-
 
         /* --------------- move robot --------------- */
         //retract odometry pods and set buket to travel position
@@ -156,22 +177,19 @@ public class RedCloseAdapt2 extends LinearOpMode {
         odoR.setAngle(0);
         odoB.setAngle(0);
         tapePan.setAngle(90);
-        tapeTilt.goToAngle(90, 2000);
+        tapeTilt.goToAngle(90, 1500);
 
 
-        //sets initial position for the drivetrain
-        double[] initialPos = {17 * side, -95.7, 0}; //x, y, phi
-        positionTracker.x = initialPos[0];
-        positionTracker.y = -initialPos[1];
-        positionTracker.phi = initialPos[2];
-
+        //reset motor encoders right before starting to move
+        resetEncoder(mLF, mLB, mRF, mRB);
+        runWithoutEncoder(mLF, mLB, mRF, mRB);
 
         //go to detect location
         do {
-            drivePower = fakePid_DrivingEdition(initialPos, detect2, positionTracker, speed, exponent, stopTolerance);
+            drivePower = fakePid_DrivingEdition(initialPos, detect0, positionTracker, speed, exponent, stopTolerance);
             drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
         } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
-        sleep(750);
+        sleep(shortWait);
 
         //detect and set target zone (based on red or blue)
         int levelTarget;
@@ -182,23 +200,23 @@ public class RedCloseAdapt2 extends LinearOpMode {
             telemetry.addData("dist", distance);
             telemetry.update();
             if (distance < 22) {
-                levelTarget = 0;
-                detectZone = detect2;
+                levelTarget = 2;
+                detectZone = detect0;
             } else {
                 do {
-                    drivePower = fakePid_DrivingEdition(detect2, detect1, positionTracker, detectSpeed, exponent, stopTolerance);
+                    drivePower = fakePid_DrivingEdition(detect0, detect1, positionTracker, detectSpeed, exponent, stopTolerance);
                     drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
                 } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
-                sleep(750);
+                sleep(shortWait);
 
                 distance = detectBlue.getDistance(DistanceUnit.CM);
                 telemetry.addData("dist", distance);
                 telemetry.update();
                 if (distance < 22) {
                     levelTarget = 1;
-                    detectZone = detect2;
+                    detectZone = detect1;
                 } else {
-                    levelTarget = 2;
+                    levelTarget = 0;
                     detectZone = detect1;
                 }
             }
@@ -208,23 +226,23 @@ public class RedCloseAdapt2 extends LinearOpMode {
             telemetry.addData("dist", distance);
             telemetry.update();
             if (distance < 22) {
-                levelTarget = 2;
-                detectZone = detect2;
+                levelTarget = 0;
+                detectZone = detect0;
             } else {
                 do {
-                    drivePower = fakePid_DrivingEdition(detect2, detect1, positionTracker, detectSpeed, exponent, stopTolerance);
+                    drivePower = fakePid_DrivingEdition(detect0, detect1, positionTracker, detectSpeed, exponent, stopTolerance);
                     drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
                 } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}));
-                sleep(750);
+                sleep(shortWait);
 
                 distance = detectRed.getDistance(DistanceUnit.CM);
                 telemetry.addData("dist", distance);
                 telemetry.update();
                 if (distance < 22) {
                     levelTarget = 1;
-                    detectZone = detect2;
+                    detectZone = detect1;
                 } else {
-                    levelTarget = 0;
+                    levelTarget = 2;
                     detectZone = detect1;
                 }
             }
@@ -234,13 +252,13 @@ public class RedCloseAdapt2 extends LinearOpMode {
         else if (levelTarget == 1) telemetry.addData("level", "middle");
         else telemetry.addData("level", "top");
         telemetry.update();
-        sleep(500);
+        sleep(longerWait);
 
 
         //go to ash
         if (levelTarget == 0) {
             long startASH = System.currentTimeMillis();
-            long timeOutASH = 2500;
+            long timeOutASH = 2250;
             do {
                 drivePower = fakePid_DrivingEdition(detectZone, ashLow, positionTracker, speed, exponent, stopTolerance);
                 drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
@@ -253,7 +271,8 @@ public class RedCloseAdapt2 extends LinearOpMode {
                 drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
             } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startASH) < timeOutASH));
         }
-        sleep(500);
+        sleep(longerWait);
+
 
         //raise and dump
         long startDump = System.currentTimeMillis();
@@ -272,53 +291,99 @@ public class RedCloseAdapt2 extends LinearOpMode {
             while (top.isPressed() && !isStopRequested() && ((System.currentTimeMillis() - startDump) < timeOutDump));
             linear.setPower(0);
         }
-        sleep(250);
+        sleep(shortWait);
         outtake2.setAngle(outtake2DumpPos2);
-        outtake.goToAngle(outtake2DumpPos2, 1000);
-
-        sleep(250);
+        outtake.goToAngle(outtake2DumpPos2, 750);
 
 
-        //go to carousel
-        if (levelTarget == 0){
-            long startCarousel = System.currentTimeMillis();
-            long timeOutCarousel = 4500;
+        //go to wall
+        double distance;
+        if (levelTarget == 0) {
+            long startWall = System.currentTimeMillis();
+            long timeOutWall = 2000;
             do {
-                drivePower = fakePid_DrivingEdition(ashLow, carouselLow, positionTracker, speed, 6, stopTolerance);
+                drivePower = fakePid_DrivingEdition(ashLow, goToWall, positionTracker, detectSpeed, exponent, stopTolerance);
                 drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
-            } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startCarousel) < timeOutCarousel));
+                distance = detectBlue.getDistance(DistanceUnit.CM); //todo: this is only for blu ewill need to chance if swap sides of field
+            } while (!isStopRequested() && distance > wallTolerance[0] && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startWall) < timeOutWall));
         } else {
-            long startCarousel = System.currentTimeMillis();
-            long timeOutCarousel = 4500;
+            long startWall = System.currentTimeMillis();
+            long timeOutWall = 2000;
             do {
-                drivePower = fakePid_DrivingEdition(ash, carousel, positionTracker, speed, 6, stopTolerance);
+                drivePower = fakePid_DrivingEdition(ash, goToWall, positionTracker, detectSpeed, exponent, stopTolerance);
                 drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
-            } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startCarousel) < timeOutCarousel));
+                distance = detectBlue.getDistance(DistanceUnit.CM); //todo: this is only for blu ewill need to chance if swap sides of field
+            } while (!isStopRequested() && distance > wallTolerance[0] && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startWall) < timeOutWall));
         }
-        sleep(250);
 
 
-        //spin carousel
-        spin(spinner, 0.7 * side, 5250); //turns on carousel spinner at power 0.5 for 500ms (or whatever you set them to)
-
-
-        //park in asu
-        long startPark = System.currentTimeMillis();
-        long timeOutPark = 2750;
+        //go into warehouse and collect freight
+        long startCollect = System.currentTimeMillis();
+        long timeOutCollect = 3000;
         do {
-            drivePower = fakePid_DrivingEdition(carousel, asuPark, positionTracker, speed, exponent, stopTolerance);
+            drivePower = fakePid_DrivingEdition(goToWall, getFreight, positionTracker, collectSpeed, exponent, stopTolerance);
             drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
-        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startPark) < timeOutPark));
-        sleep(250);
+
+            //lower bucket and turn on intake
+            if (bottom.isPressed()) linear.setPower(-maxLinearPower * 0.75);
+            if ((System.currentTimeMillis() - startCollect) > 1000) {
+                outtakeBoth(outtake2CollectPos);
+                intake.setPower(0.7);
+            }
+        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startCollect) < timeOutCollect));
+        intake.setPower(0);
 
 
-        //lower slide to be ready to start teleop
-        outtake.setAngle(outtake2TravelPos);
-        outtake2.goToAngle(outtake2TravelPos, 500);
+        //raise and return
+        long startReturn = System.currentTimeMillis();
+        long timeOutReturn = 3000;
         do {
-            linear.setPower(-maxLinearPower * 0.75);
-        } while (bottom.isPressed() && !isStopRequested());
-        sleep(500);
+            drivePower = fakePid_DrivingEdition(getFreight, goToWall, positionTracker, speed, exponent, stopTolerance);
+            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+            outtakeBoth(outtake2TravelPos);
+
+            distance = detectBlue.getDistance(DistanceUnit.CM); //todo: this is only for blu ewill need to chance if swap sides of field
+        } while (!isStopRequested() && distance > wallTolerance[0] && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startReturn) < timeOutReturn));
+
+
+        //go back to ash
+        long startASH2 = System.currentTimeMillis();
+        long timeOutASH2 = 2250;
+        do {
+            drivePower = fakePid_DrivingEdition(goToWall, ash, positionTracker, speed, exponent, stopTolerance);
+            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startASH2) < timeOutASH2));
+
+        //dump again
+        do linear.setPower(maxLinearPower);
+        while (top.isPressed() && !isStopRequested());
+        linear.setPower(0);
+        sleep(shortWait);
+        outtake2.setAngle(outtake2DumpPos2);
+        outtake.goToAngle(outtake2DumpPos2, 750);
+
+        //approach wall to get ready to park in warehouse
+        long startWall = System.currentTimeMillis();
+        long timeOutWall = 2000;
+        do {
+            drivePower = fakePid_DrivingEdition(ash, goToWall, positionTracker, detectSpeed, exponent, stopTolerance);
+            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+            distance = detectBlue.getDistance(DistanceUnit.CM); //todo: this is only for blu ewill need to chance if swap sides of field
+        } while (!isStopRequested() && distance > wallTolerance[0] && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startWall) < timeOutWall));
+
+        //park in warehouse (and intake another piece of freight to be ready for teleop
+        do {
+            drivePower = fakePid_DrivingEdition(goToWall, getFreight, positionTracker, collectSpeed, exponent, stopTolerance);
+            drivetrain.driveWithGamepad(1, drivePower[1], drivePower[2], drivePower[0]);
+
+            //lower bucket and turn on intake
+            if (bottom.isPressed()) linear.setPower(-maxLinearPower * 0.75);
+            if ((System.currentTimeMillis() - startCollect) > 1000) {
+                outtakeBoth(outtake2CollectPos);
+                intake.setPower(0.7);
+            }
+        } while (!isStopRequested() && !Arrays.equals(drivePower, new double[]{0, 0, 0}) && ((System.currentTimeMillis() - startCollect) < timeOutCollect));
+        intake.setPower(0);
 
 
         /* ---------------- shut down ---------------- */
@@ -364,6 +429,33 @@ public class RedCloseAdapt2 extends LinearOpMode {
         name.setPower(power);
         sleep(waitTime);
         name.setPower(0);
+    }
+
+    private void resetEncoder(DcMotorX name) {
+        name.resetEncoder();
+    }
+
+    private void resetEncoder(DcMotorX name0, DcMotorX name1, DcMotorX name2, DcMotorX name3) {
+        name0.resetEncoder();
+        name1.resetEncoder();
+        name2.resetEncoder();
+        name3.resetEncoder();
+    }
+
+    private void runWithoutEncoder(DcMotorX name) {
+        name.runWithoutEncoder();
+    }
+
+    private void runWithoutEncoder(DcMotorX name0, DcMotorX name1, DcMotorX name2, DcMotorX name3) {
+        name0.runWithoutEncoder();
+        name1.runWithoutEncoder();
+        name2.runWithoutEncoder();
+        name3.runWithoutEncoder();
+    }
+
+    private void outtakeBoth(double targetPos) {
+        outtake.setAngle(targetPos);
+        outtake2.setAngle(targetPos);
     }
 
 

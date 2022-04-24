@@ -116,11 +116,6 @@ public class BlueCloseAdapt2 extends LinearOpMode {
         // sets up drivetrain
         drivetrain = new Drivetrain(mRF, mLF, mRB, mLB);
 
-        //sets initial position for the drivetrain
-        double[] initialPos = {17 * side, -95.7, 0}; //x, y, phi
-        positionTracker.x = initialPos[0];
-        positionTracker.y = -initialPos[1];
-        positionTracker.phi = initialPos[2];
 
         //sets up threading for odometry
         Thread positionTracking = new Thread(positionTracker);
@@ -140,8 +135,8 @@ public class BlueCloseAdapt2 extends LinearOpMode {
         double[] drivePower;
 
         //positions: in the format x, y, phi. (in cm for x and y and radians for phi) this can be declared at the top of the program
-        double[] ash = {(127.5-1.5) * side, -101, 0}; //-102 for y
-        double[] ashLow = {(127.5-3) * side, -101, 0};
+        double[] ash = {(127.5 - 1.5) * side, -101, 0}; //-102 for y
+        double[] ashLow = {(127.5 - 3) * side, -101, 0};
 //        double[] carousel = {-23, -50, 0}; //works for bottom corner
         double[] carousel = {27.8 * side, -39.5, 0}; //todo: fine tune this
         double[] carouselLow = {27 * side, -39.5, 0}; //todo: fine tune this
@@ -163,6 +158,16 @@ public class BlueCloseAdapt2 extends LinearOpMode {
         odoB.setAngle(0);
         tapePan.setAngle(90);
         tapeTilt.goToAngle(90, 2000);
+
+
+        //sets initial position for the drivetrain and fixes issues hopefully
+        double[] initialPos = {17 * side, -95.7, 0}; //x, y, phi
+        positionTracker.x = initialPos[0];
+        positionTracker.y = -initialPos[1];
+        positionTracker.phi = initialPos[2];
+
+        resetEncoder(mLF, mLB, mRF, mRB);
+        runWithoutEncoder(mLF, mLB, mRF, mRB);
 
         //go to detect location
         do {
@@ -278,7 +283,7 @@ public class BlueCloseAdapt2 extends LinearOpMode {
 
 
         //go to carousel
-        if (levelTarget == 0){
+        if (levelTarget == 0) {
             long startCarousel = System.currentTimeMillis();
             long timeOutCarousel = 4500;
             do {
@@ -362,6 +367,28 @@ public class BlueCloseAdapt2 extends LinearOpMode {
         name.setPower(power);
         sleep(waitTime);
         name.setPower(0);
+    }
+
+    private void resetEncoder(DcMotorX name) {
+        name.resetEncoder();
+    }
+
+    private void resetEncoder(DcMotorX name0, DcMotorX name1, DcMotorX name2, DcMotorX name3) {
+        name0.resetEncoder();
+        name1.resetEncoder();
+        name2.resetEncoder();
+        name3.resetEncoder();
+    }
+
+    private void runWithoutEncoder(DcMotorX name) {
+        name.runWithoutEncoder();
+    }
+
+    private void runWithoutEncoder (DcMotorX name0, DcMotorX name1, DcMotorX name2, DcMotorX name3)  {
+        name0.runWithoutEncoder();
+        name1.runWithoutEncoder();
+        name2.runWithoutEncoder();
+        name3.runWithoutEncoder();
     }
 
 
